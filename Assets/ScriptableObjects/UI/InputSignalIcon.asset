@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7e5c028f8b0c5b4ebf0ff72635b6829, type: 3}
+  m_Name: InputSignalIcon
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  leftUp: {fileID: 21300000, guid: 48ad4009103f3794d8fc71a2f6812714, type: 3}
+  Up: {fileID: 21300000, guid: 9e545e16a12cf1742ad9ec5c857306cb, type: 3}
+  rightUp: {fileID: 21300000, guid: ad7dd0edf6a086747b0ae6d187c3019e, type: 3}
+  left: {fileID: 21300000, guid: db533a4be42065f4d9ef527ab3de6fa7, type: 3}
+  NoneInput: {fileID: 21300000, guid: 106a532ed1d362e4a9fe174b34f11145, type: 3}
+  right: {fileID: 21300000, guid: db1d548ac366e114393a4e071c1e42a4, type: 3}
+  leftDown: {fileID: 21300000, guid: 9017a45d13ad4c242a88a308d961f753, type: 3}
+  down: {fileID: 21300000, guid: 5bf4ffaeed9b6ac4f8c895040530f091, type: 3}
+  rightDown: {fileID: 21300000, guid: d5329d898ea831f4896a26f5dc9892c1, type: 3}
+  lightPunch: {fileID: 21300000, guid: 626d8635994781d41b6202967830bdbc, type: 3}
+  mediumPunch: {fileID: 21300000, guid: 44539cee3938d984bb70fdea7415b60d, type: 3}
+  hardPunch: {fileID: 21300000, guid: 87ad1a7f1d43c83408c8a5214bb6631b, type: 3}
+  lightKick: {fileID: 21300000, guid: c5b54040187a1564faa2d44b6c66666c, type: 3}
+  mediumKick: {fileID: 21300000, guid: 1ae938aa1cb8db54d9217b1d83396044, type: 3}
+  hardKick: {fileID: 21300000, guid: c9c2b28eb98dfc6419a602fe705e14ea, type: 3}
