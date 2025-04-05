@@ -113,28 +113,16 @@ public class RecordUIManager : MonoBehaviour
         switch (direction.direction)
         {
             case Direction.Front:
-                if (m_isInLeft)
-                    recordUI.SetDirectionImage("Right");
-                else
-                    recordUI.SetDirectionImage("Left");
+                recordUI.SetDirectionImage(m_isInLeft ? "Right" : "Left");
                 break;
-            case Direction.FrontDown:
-                if (m_isInLeft)
-                    recordUI.SetDirectionImage("Right Down");
-                else
-                    recordUI.SetDirectionImage("Left Down");
+            case Direction.Front | Direction.Down:
+                recordUI.SetDirectionImage(m_isInLeft ? "Right Down" : "Left Down");
                 break;
             case Direction.Back:
-                if (m_isInLeft)
-                    recordUI.SetDirectionImage("Left");
-                else
-                    recordUI.SetDirectionImage("Right");
+                recordUI.SetDirectionImage(m_isInLeft ? "Left" : "Right");
                 break;
-            case Direction.BackDown:
-                if (m_isInLeft)
-                    recordUI.SetDirectionImage("Left Down");
-                else
-                    recordUI.SetDirectionImage("Right Down");
+            case Direction.Back | Direction.Down:
+                recordUI.SetDirectionImage(m_isInLeft ? "Left Down" : "Right Down");
                 break;
             case Direction.Down:
                 recordUI.SetDirectionImage("Down");
@@ -142,54 +130,32 @@ public class RecordUIManager : MonoBehaviour
             case Direction.Idle:
                 recordUI.SetDirectionImage("None");
                 break;
-            case Direction.FrontUp:
-                if (m_isInLeft)
-                    recordUI.SetDirectionImage("Right Up");
-                else
-                    recordUI.SetDirectionImage("Left Up");
+            case Direction.Front | Direction.Up:
+                recordUI.SetDirectionImage(m_isInLeft ? "Right Up" : "Left Up");
                 break;
-            case Direction.BackUp:
-                if (m_isInLeft)
-                    recordUI.SetDirectionImage("Left Up");
-                else
-                    recordUI.SetDirectionImage("Right Up");
+            case Direction.Back | Direction.Up:
+                recordUI.SetDirectionImage(m_isInLeft ? "Left Up" : "Right Up");
                 break;
             case Direction.Up:
                 recordUI.SetDirectionImage("Up");
                 break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
     private void SetAttackIcon(InputRecordUI recordUI, AttackSignal attack)
     {
-        if (attack.Contains(Attack.LightPunch))
-            recordUI.SetAttackIcon("LP", true);
-        else
-            recordUI.SetAttackIcon("LP", false);
-        
-        if (attack.Contains(Attack.MediumPunch))
-            recordUI.SetAttackIcon("MP", true);
-        else
-            recordUI.SetAttackIcon("MP", false);
-        
-        if (attack.Contains(Attack.HeavyPunch))
-            recordUI.SetAttackIcon("HP", true);
-        else
-            recordUI.SetAttackIcon("HP", false);
-        
-        if (attack.Contains(Attack.LightKick))
-            recordUI.SetAttackIcon("LK", true);
-        else
-            recordUI.SetAttackIcon("LK", false);
-        
-        if (attack.Contains(Attack.MediumKick))
-            recordUI.SetAttackIcon("MK", true);
-        else
-            recordUI.SetAttackIcon("MK", false);
-        
-        if (attack.Contains(Attack.HeavyKick))
-            recordUI.SetAttackIcon("HK", true);
-        else
-            recordUI.SetAttackIcon("HK", false);
+        recordUI.SetAttackIcon("LP", attack.Contains(Attack.LightPunch));
+
+        recordUI.SetAttackIcon("MP", attack.Contains(Attack.MediumPunch));
+
+        recordUI.SetAttackIcon("HP", attack.Contains(Attack.HeavyPunch));
+
+        recordUI.SetAttackIcon("LK", attack.Contains(Attack.LightKick));
+
+        recordUI.SetAttackIcon("MK", attack.Contains(Attack.MediumKick));
+
+        recordUI.SetAttackIcon("HK", attack.Contains(Attack.HeavyKick));
     }
     private bool IsPlayerInLeft()
     {

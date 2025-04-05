@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Sirenix.OdinInspector;
 using UnityEngine;
-using Sirenix.OdinInspector;
 
 /// <summary>
-/// 输入层，将输入转化为信号，存储在循环队列中
+/// 输入层，将输入转化为信号，存储在环形缓冲区中
 /// </summary>
 [Required("Character")]
 public class InputLayer : MonoBehaviour
@@ -15,7 +13,7 @@ public class InputLayer : MonoBehaviour
     public InputBuffer<DirectionSignal> directionInput;
     public InputBuffer<AttackSignal> attackInput;
 
-    [SerializeField] private bool m_isInLeft = true;
+    [SerializeField] private bool _isInLeft = true;
 
     public InputLayer(Transform player, Transform opponent)
     {
@@ -31,59 +29,61 @@ public class InputLayer : MonoBehaviour
 
     public void Update()
     {
-        m_isInLeft = IsPlayerInLeft();
+        _isInLeft = IsPlayerInLeft();
         DirectionInput();
         AttackInput();
     }
 
     private void DirectionInput()
     {
-        int horizontal = (int)Input.GetAxisRaw("Horizontal");
-        int vertical = (int)Input.GetAxisRaw("Vertical");
+        var horizontal = Input.GetAxisRaw("Horizontal");
+        var vertical = Input.GetAxisRaw("Vertical");
         Direction direction = Direction.Idle;
-        DirectionSignal signal = (DirectionSignal)directionInput.Read(0);
+        DirectionSignal signal = directionInput.Read(0);
         // 由于每一帧声明了一个新的 InputSignal 变量，所以不需要将未输入的方向位 置0
         // 水平输入
         // 玩家在左侧
-        if (m_isInLeft)
+        if (_isInLeft)
         {
-            if (horizontal > 0)
+            switch (horizontal)
             {
-                direction |= Direction.Front;               // 00XX |= 0001  ->  00X1
-            }
-            else if (horizontal < 0)
-            {
-                direction |= Direction.Back;                // 00XX |= 0010  ->  001X
+                case > 0:
+                    direction |= Direction.Front;               // 00XX |= 0001  ->  00X1
+                    break;
+                case < 0:
+                    direction |= Direction.Back;                // 00XX |= 0010  ->  001X
+                    break;
             }
         }
         // 玩家在右侧
         else
         {
-            if (horizontal > 0)
+            switch (horizontal)
             {
-                direction |= Direction.Back;                           
-            }
-            else if (horizontal < 0)
-            {
-                direction |= Direction.Front;                          
+                case > 0:
+                    direction |= Direction.Back;
+                    break;
+                case < 0:
+                    direction |= Direction.Front;
+                    break;
             }
         }
 
-        // 竖直输入
-        if (vertical > 0)
+        switch (vertical)
         {
-            direction |= Direction.Up;
-        }
-        else if (vertical < 0)
-        {
-            direction |= Direction.Down;
-        }
-        else
-        {
-            direction &= ~Direction.Up;
+            // 竖直输入
+            case > 0:
+                direction |= Direction.Up;
+                break;
+            case < 0:
+                direction |= Direction.Down;
+                break;
+            default:
+                direction &= ~Direction.Up;
+                break;
         }
 
-        // 判断当前帧输入方向是否与上一帧相同，相同则只修改输入信号的持续市场；不同则录入新的信号
+        // 判断当前帧输入方向是否与上一帧相同，相同则只修改输入信号的持续时长；不同则录入新的信号
         if (signal != null && direction == signal.direction)
         {
             signal.duration = signal.duration >= 99 ? 99 : signal.duration + 1;
@@ -106,7 +106,7 @@ public class InputLayer : MonoBehaviour
         bool heavyPunch = Input.GetKey(KeyCode.O);
         bool heavyKick = Input.GetKey(KeyCode.L);
         Attack attack = Attack.None;
-        AttackSignal signal = (AttackSignal)attackInput.Read(0);
+        AttackSignal signal = attackInput.Read(0);
 
         // 轻拳
         if (lightPunch)

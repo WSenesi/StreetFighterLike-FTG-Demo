@@ -5,17 +5,23 @@ public interface ISignal
 {
     int Duration { get; }
 }
+[Flags]
 public enum Direction
 {
-    Up = 8,
-    Down = 4,
-    Back = 2,
-    Front = 1,
     Idle = 0,
-    FrontUp = 9,
-    FrontDown = 5,
-    BackUp = 10,
-    BackDown = 6,
+    Front = 1,
+    Back = 2,
+    Down = 4,
+    Up = 8,
+    // Up = 8,
+    // Down = 4,
+    // Back = 2,
+    // Front = 1,
+    // Idle = 0,
+    // FrontUp = 9,
+    // FrontDown = 5,
+    // BackUp = 10,
+    // BackDown = 6,
 }
 [Serializable]
 public class DirectionSignal : ISignal
