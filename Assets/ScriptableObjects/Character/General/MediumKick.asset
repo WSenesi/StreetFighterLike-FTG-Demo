@@ -49,9 +49,7 @@ MonoBehaviour:
       Data: 
   requestID: "\u7AD9\u4E2D\u811A"
   type: 1
-  directionSignals:
-  - direction: 0
-    duration: 1
+  directionSignals: []
   attackSignals:
   - attack: 8
     duration: 1

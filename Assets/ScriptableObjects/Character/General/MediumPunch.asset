@@ -49,12 +49,10 @@ MonoBehaviour:
       Data: 
   requestID: "\u7AD9\u4E2D\u62F3"
   type: 1
-  directionSignals:
-  - direction: 0
-    duration: 1
+  directionSignals: []
   attackSignals:
   - attack: 4
     duration: 1
   windowLength: 20
   lifeTime: 10
-  priority: 0
+  priority: 8
