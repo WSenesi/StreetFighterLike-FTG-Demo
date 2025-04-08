@@ -874,7 +874,6 @@ GameObject:
   - component: {fileID: 1673200927}
   - component: {fileID: 1673200926}
   - component: {fileID: 1673200924}
-  - component: {fileID: 1673200930}
   - component: {fileID: 1673200931}
   m_Layer: 0
   m_Name: Player 1
@@ -897,7 +896,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 1673200929}
   opponent: {fileID: 1344962687}
-  m_isInLeft: 0
+  _isInLeft: 0
 --- !u!136 &1673200926
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -977,27 +976,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1673200930
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1673200923}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2351628ffc1b7c74e9c6dcfe22fa700a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputLayer: {fileID: 1673200924}
-  characterMoveRequests:
-  - {fileID: 11400000, guid: b0b59ab9862e9084a8d69ffc9b3bc714, type: 2}
-  - {fileID: 11400000, guid: 2f8045b2bb43cff428b13dd170990672, type: 2}
-  - {fileID: 11400000, guid: b9a0f8a6abe75f540835a9394dfe3f66, type: 2}
-  - {fileID: 11400000, guid: 38308c567660bcc4694a5c052ff3eab2, type: 2}
-  - {fileID: 11400000, guid: d87266765bf039045adcfa108a1a25c1, type: 2}
-  - {fileID: 11400000, guid: 32d1f915e5f859f4db258f919445c3aa, type: 2}
-  - {fileID: 11400000, guid: b0b59ab9862e9084a8d69ffc9b3bc714, type: 2}
 --- !u!114 &1673200931
 MonoBehaviour:
   m_ObjectHideFlags: 0
