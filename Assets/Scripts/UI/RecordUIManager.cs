@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using src.Input_Layer;
 using UnityEngine;
 
 public class RecordUIManager : MonoBehaviour
@@ -8,8 +9,8 @@ public class RecordUIManager : MonoBehaviour
     [SerializeField] private Transform player;
     [SerializeField] private Transform opponent;
     [Range(1, 99)] public int capacity = 20;
-
-    [SerializeField] private InputLayer inputLayer;
+    public Character character;
+    private InputLayer inputLayer;
     private InputBuffer<DirectionSignal> directionInput;
     private InputBuffer<AttackSignal> attackInput;
     private List<InputRecordUI> m_recordList;
@@ -26,6 +27,7 @@ public class RecordUIManager : MonoBehaviour
     }
     private void Start()
     {
+        inputLayer = character.inputLayer;
         if (inputLayer is null)
             throw new Exception("输入层为空");
         directionInput = inputLayer.directionInput;

@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using src.Request_Layer;
+using UnityEngine;
 
 /// <summary>
 /// 用以描述 请求 触发 行为 的前置条件
@@ -29,16 +30,16 @@ public class RequestSO : SerializedScriptableObject, IPrioritizedExpirable
     public RequestType type;
     public List<DirectionSignal> directionSignals;// = new List<DirectionSignal>();
     public List<AttackSignal> attackSignals;// = new List<AttackSignal>();
-    public Dictionary<RequestState, int> behaviorIdMap = new Dictionary<RequestState, int>();
     public int windowLength = 20;
     public int lifeTime = 10;
     public int priority = 0;
+    public List<MappingRuleSO> mappingRules;
 
     public string Name { get => name; }
     public int Priority { get => priority; set => priority = value; }
     public int Lifetimes { get => lifeTime; set => lifeTime = value; }
 }
-[System.Serializable]
+[Serializable]
 public struct RequestInfo
 {
     public RequestSO request;

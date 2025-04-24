@@ -1,6 +1,10 @@
+using System;
 using System.Collections.Generic;
 using src.Request_Layer;
 using UnityEngine;
+
+public delegate bool RequestCheck<in TRequest, in TContext, TMappingRule>(
+    TRequest request, TContext context, out TMappingRule mappingRule);
 
 /// <summary>
 /// 支持元素过期销毁的优先队列。
@@ -11,7 +15,7 @@ using UnityEngine;
 /// (泛型接口还有优化空间) 
 /// </summary>
 /// <typeparam name="TRequest">包含优先级和生命周期数据的请求</typeparam>
-[System.Serializable]
+[Serializable]
 public class ReqPriorityQueue<TRequest> where TRequest : IPrioritizedExpirable
 {
     private class RequestNode
@@ -28,7 +32,7 @@ public class ReqPriorityQueue<TRequest> where TRequest : IPrioritizedExpirable
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     private struct RequestNodeInfo
     {
         public string name;
@@ -89,6 +93,56 @@ public class ReqPriorityQueue<TRequest> where TRequest : IPrioritizedExpirable
         return false;
     }
 
+    /// <summary>
+    /// 按优先级顺序查找第一个满足指定外部条件的请求。
+    /// 条件检查逻辑由外部通过 conditionCheck 委托提供，该委托还需要检查请求内部的映射规则。
+    /// 如果找到，则将请求从队列中移除，并返回该请求及触发它的映射规则。
+    /// </summary>
+    /// <typeparam name="TContext">上下文数据的类型。</typeparam>
+    /// <typeparam name="TMappingRule">映射规则的类型。</typeparam>
+    /// <param name="context">传递给条件检查委托的上下文数据。</param>
+    /// <param name="condition">
+    /// 一个委托，用于判断给定的请求和上下文是否满足条件。
+    /// 如果满足，该委托应将匹配的映射规则赋值给其 out 参数并返回 true。
+    /// </param>
+    /// <param name="request">如果找到满足条件的请求，则返回该请求；否则返回 default。</param>
+    /// <param name="matchedRule">如果找到满足条件的请求，则返回触发该请求的映射规则；否则返回 default。</param>
+    /// <returns>如果找到并移除了满足条件的请求，则返回 true；否则返回 false。</returns>
+    public bool TryDequeueIf<TContext, TMappingRule>(
+        TContext context,
+        RequestCheck<TRequest, TContext, TMappingRule> condition, 
+        out TRequest request,
+        out TMappingRule matchedRule) where TMappingRule : MappingRuleSO
+    {
+        var current = _head;
+        while (current is not null)
+        {
+            // 调用外部传入的委托进行检查
+            // 委托内部会处理遍历 MappingRuleSO 列表和 ConditionBase 列表的逻辑
+            if (condition(current.request, context, out var currentMatchedRule))
+            {
+                // 委托返回 true，表示找到了满足条件的请求和规则
+                request = current.request;
+                matchedRule = currentMatchedRule; // 获取由委托找到的规则
+
+                // Debug.Log($"Dequeuing request '{request.Name}' triggered by rule '{matchedRule?.name}' (or identifier)."); // 可选调试
+
+                RemoveNode(current);  // 从链表中移除
+                ReleaseNode(current); // 回收到对象池
+                UpdateNodeInfo();     // 更新调试信息
+                return true;          // 成功找到并移除，返回 true
+            }
+
+            // 如果当前请求不满足条件，继续检查下一个 (优先级更低的)
+            current = current.next;
+        }
+
+        // 遍历完所有请求都没有找到满足条件的
+        request = default;
+        matchedRule = null;
+        return false; // 返回 false
+    }
+    
     private RequestNode GetNode()
     {
         return _nodePool.Count > 0 ? _nodePool.Pop() : new RequestNode();

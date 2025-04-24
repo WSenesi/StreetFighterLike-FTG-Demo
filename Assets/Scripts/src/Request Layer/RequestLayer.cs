@@ -1,33 +1,37 @@
-using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using src.Input_Layer;
 
 namespace src.Request_Layer
 {
-    [RequireComponent(typeof(InputLayer))]
-    public class RequestLayer : MonoBehaviour
+    [Serializable]
+    public class RequestLayer
     {
-        public InputLayer inputLayer;
-        public List<RequestSO> characterMoveRequests;
         public ReqPriorityQueue<RequestSO> generatedRequests;
+        
+        private readonly List<RequestSO> _characterMoveRequests;
+        private readonly InputBuffer<DirectionSignal> _dirCache;
+        private readonly InputBuffer<AttackSignal> _atkCache;
 
-        private InputBuffer<DirectionSignal> _dirCache;
-        private InputBuffer<AttackSignal> _atkCache;
-
-        private void Start()
+        public RequestLayer(InputLayer inputLayer, List<RequestSO> characterMoveRequests)
         {
-            _atkCache = inputLayer.attackInput;
             _dirCache = inputLayer.directionInput;
+            _atkCache = inputLayer.attackInput;
+            this._characterMoveRequests = characterMoveRequests;
             generatedRequests = new ReqPriorityQueue<RequestSO>();
-
-            for (int i = 0; i < characterMoveRequests.Count; i++)
+        }
+        
+        public void Start()
+        {
+            for (int i = 0; i < _characterMoveRequests.Count; i++)
             {
-                RequestSO request = characterMoveRequests[i];
+                RequestSO request = _characterMoveRequests[i];
                 request.Priority = i;
             }
         }
 
-        private void Update()
+        public void Update()
         {
             GenerateRequests();
             generatedRequests.Update();
@@ -35,7 +39,7 @@ namespace src.Request_Layer
 
         private void GenerateRequests()
         {
-            foreach (var request in characterMoveRequests.Where(CanRequestPerform))
+            foreach (var request in _characterMoveRequests.Where(CanRequestPerform))
             {
                 generatedRequests.Enqueue(request);
                 break;
