@@ -17,10 +17,11 @@ public class BehaviorLayer
     private ContextData _contextData;
     private CharacterContextFlag _currentContextFlag;
 
-    public BehaviorLayer(RequestLayer requestLayer, StateGraphSO stateGraphConfig)
+    public BehaviorLayer(RequestLayer requestLayer, StateGraphSO stateGraphConfig, ContextData contextData)
     {
         _generatedRequests = requestLayer.generatedRequests;
         this.stateGraphConfig = stateGraphConfig;
+        this._contextData = contextData;
     }
     
     public void Start()

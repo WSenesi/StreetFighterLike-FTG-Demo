@@ -9,17 +9,19 @@ namespace src.Input_Layer
     {
         private Transform player;
         private Transform opponent;
-    
+        
         public InputBuffer<DirectionSignal> directionInput;
         public InputBuffer<AttackSignal> attackInput;
 
+        private ContextData _context;
         private bool _isInLeft = true;
 
-        public InputLayer(Transform player, Transform opponent)
+        public InputLayer(ContextData context)
         {
-            this.player = player;
-            this.opponent = opponent;
-        
+            this._context = context;
+            this.player = context.owner;
+            this.opponent = context.opponent;
+            
             directionInput = new InputBuffer<DirectionSignal>();
             attackInput = new InputBuffer<AttackSignal>();
         }
@@ -97,6 +99,8 @@ namespace src.Input_Layer
                 //if (signal != null)
                 //    Debug.Log("输入方向信号：" + signal.direction + " 持续" + signal.duration + "帧");
             }
+            
+            _context.dirInput = direction;
         }
 
         private void AttackInput()
@@ -158,6 +162,8 @@ namespace src.Input_Layer
                 //if (signal != null)
                 //    Debug.Log("输入攻击信号：" + signal.attack + " 持续" + signal.duration + "帧");
             }
+
+            _context.atkInput = attack;
         }
 
         private bool IsPlayerInLeft()

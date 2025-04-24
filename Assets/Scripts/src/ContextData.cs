@@ -1,16 +1,19 @@
+using src.Behavior_Layer;
+using src.Input_Layer;
 using UnityEngine;
 
-namespace src.Behavior_Layer
+namespace src
 {
-    public struct ContextData
+    public class ContextData
     {
-        public GameObject owner;
-        public GameObject opponent;
+        public Transform owner;
+        public Transform opponent;
         public CharacterContextFlag currentContextFlag;
         public MoveBehaviorSO currentStateID;
         
         // TODO: Define other runtime data
-        
+        public Direction dirInput;
+        public Attack atkInput;
         public float distanceToOpponent;
         // public int healthPercent;
         // public int comboCount;
@@ -19,7 +22,7 @@ namespace src.Behavior_Layer
         public AnimationController animationController;
         
 
-        public ContextData(GameObject owner, GameObject opponent, AnimationController animationController,
+        public ContextData(Transform owner, Transform opponent, AnimationController animationController,
             MoveBehaviorSO currentStateID = null,
             CharacterContextFlag currentContextFlag = CharacterContextFlag.None
             )

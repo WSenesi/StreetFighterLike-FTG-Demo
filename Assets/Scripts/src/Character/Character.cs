@@ -16,19 +16,27 @@ public class Character : SerializedMonoBehaviour
     public AnimationController animationController;
     
     // Config
-    [Tooltip("角色招式输入配置，列表索引越小优先级越高")] public List<RequestSO> characterMoveRequests;
-    [Tooltip("角色行为状态图配置")] public StateGraphSO stateGraphConfig; 
+    [Tooltip("角色招式输入配置，列表索引越小优先级越高")] 
+    public List<RequestSO> characterMoveRequests;
+    [Tooltip("角色行为状态图配置")] 
+    public StateGraphSO stateGraphConfig; 
     
     
     [NonSerialized] public InputLayer inputLayer;
     [NonSerialized, OdinSerialize] public RequestLayer requestLayer;
     [NonSerialized, OdinSerialize] public BehaviorLayer behaviorLayer;
 
+    private ContextData _context;
+    
     private void Awake()
     {
-        inputLayer = new InputLayer(player, opponent);
+        // 初始化 ContextData
+        _context = new ContextData(player, opponent, animationController);
+        
+        // 初始化三层
+        inputLayer = new InputLayer(_context);
         requestLayer = new RequestLayer(inputLayer, characterMoveRequests);
-        behaviorLayer = new BehaviorLayer(requestLayer, stateGraphConfig);
+        behaviorLayer = new BehaviorLayer(requestLayer, stateGraphConfig, _context);
         
     }
 
