@@ -1,21 +1,20 @@
 namespace src.Behavior_Layer.FTG_StateMachine
 {
-    public class IdleState<TStateID> : BehaviorState<TStateID>
+    public class CrouchState<TStateID> : BehaviorState<TStateID>
     {
-        private IdleConfigSO _behaviorData;
-
-        public IdleState(IdleConfigSO behaviorData,
-            bool needsExitTime, bool isGhostState = false) : base(needsExitTime, isGhostState)
+        private readonly CrouchConfigSO _behaviorData;
+        
+        public CrouchState(CrouchConfigSO behaviorData, bool needsExitTime, bool isGhostState = false) : base(needsExitTime, isGhostState)
         {
             this._behaviorData = behaviorData;
         }
-
+        
         protected override void OnEnter(ContextData context)
         {
             if (_behaviorData is null) return;
             
             // 播放动画
-            context.animationController?.PlayAnimation(_behaviorData.IdleAnimation);
+            context.animationController?.PlayAnimation(_behaviorData.crouchDownAnimation);
         }
 
         protected override void OnLogic(ContextData contextData)

@@ -6,18 +6,20 @@ using UnityEngine;
 
 namespace src.Request_Layer
 {
-    [CreateAssetMenu(menuName = "MyScriptableObject/Character/Mapping Rule")]
+    [CreateAssetMenu(menuName = "Character/Mapping Rule")]
     public class MappingRuleSO : ScriptableObject
     {
         [SerializeReference] 
         public List<ConditionBase> conditions;
 
-        public List<MoveBehaviorSO> requiredStateIDs;
+        public List<BaseBehaviorConfigSO> requiredStateIDs;
         [Tooltip("映射的触发器名称")] public string mappingResult;            
         public int priority;
 
         public bool MatchesContext(ContextData context)
         {
+            if (conditions is null || conditions.Count == 0)
+                return true;
             return conditions.All(condition => condition.Evaluate(context));
         }
         

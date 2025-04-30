@@ -2,7 +2,9 @@ using System;
 using src;
 using src.Behavior_Layer;
 using src.Behavior_Layer.FTG_StateMachine;
+using src.PresentationLayer;
 using src.Request_Layer;
+using UnityEngine;
 
 [Serializable]
 public class BehaviorLayer
@@ -13,7 +15,7 @@ public class BehaviorLayer
     private AnimationController _animationController;
     
     private ReqPriorityQueue<RequestSO> _generatedRequests;
-    private FTGStateMachine<MoveBehaviorSO> _fsm;
+    private FTGStateMachine<BaseBehaviorConfigSO> _fsm;
     private ContextData _contextData;
     private CharacterContextFlag _currentContextFlag;
 
@@ -27,15 +29,15 @@ public class BehaviorLayer
     public void Start()
     {
         _fsm = StateGraphSO.BuildStateMachine(stateGraphConfig);
+        _fsm.ContextData = _contextData;
         _fsm.Init();
-
-        _contextData = _fsm.ContextData;
+        
     }
 
     public void Update()
     {
         // 1. 获取当前Context
-        UpdateContextData();
+        // UpdateContextData();
         
         // 2. 尝试从请求队列获取能够执行的状态触发器
         TryGetBehavior();
@@ -56,6 +58,7 @@ public class BehaviorLayer
         if (_generatedRequests.TryDequeueIf(_contextData, CheckRequest, out request, out mappingRule))
         {
             var trigger = mappingRule.mappingResult;
+            Debug.Log($"{mappingRule.name}: {trigger}");
             _fsm.Trigger(trigger);
         }
     }

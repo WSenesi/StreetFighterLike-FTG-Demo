@@ -1,15 +1,16 @@
 using System;
+using UnityEngine;
 
 namespace src.Behavior_Layer.EventConfig
 {
     [Serializable]
     public class AnimationEvent : EventConfigBase
     {
-        public string animationName;
+        public AnimationClip animationClip;
         public float transitionDuration;
         public override void Execute(ContextData context)
         {
-            context.animationController.PlayAnimation(animationName, transitionDuration);
+            context.animationController.PlayAnimation(animationClip);
         }
     }
 }

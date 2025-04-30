@@ -25,7 +25,7 @@ namespace src.Request_Layer
         Charge = 2,
     }
 
-    [CreateAssetMenu(fileName = "RequestSO", menuName = "MyScriptableObject/Character/Request")]
+    [CreateAssetMenu(fileName = "RequestSO", menuName = "Character/Request")]
     public class RequestSO : SerializedScriptableObject, IPrioritizedExpirable
     {
         public string requestID;

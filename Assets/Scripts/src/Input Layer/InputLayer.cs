@@ -34,6 +34,7 @@ namespace src.Input_Layer
         public void Update()
         {
             _isInLeft = IsPlayerInLeft();
+            _context.isFacingRight = _isInLeft;
             DirectionInput();
             AttackInput();
         }
@@ -42,7 +43,7 @@ namespace src.Input_Layer
         {
             var horizontal = Input.GetAxisRaw("Horizontal");
             var vertical = Input.GetAxisRaw("Vertical");
-            Direction direction = Direction.Idle;
+            Direction direction = Direction.None;
             DirectionSignal signal = directionInput.Read(0);
             // 由于每一帧声明了一个新的 InputSignal 变量，所以不需要将未输入的方向位 置0
             // 水平输入

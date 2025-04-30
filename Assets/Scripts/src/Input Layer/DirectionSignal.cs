@@ -10,7 +10,7 @@ namespace src.Input_Layer
     [Flags]
     public enum Direction
     {
-        Idle = 0,
+        None = 0,
         Front = 1,
         Back = 2,
         Down = 4,
@@ -21,7 +21,7 @@ namespace src.Input_Layer
     {
         [HorizontalGroup("DirectionSignal")]
         [VerticalGroup("DirectionSignal/Direction")]
-        public Direction direction = Direction.Idle;
+        public Direction direction = Direction.None;
         [VerticalGroup("DirectionSignal/Duration")]
         public int duration = 1;
     
@@ -39,7 +39,7 @@ namespace src.Input_Layer
         /// <returns></returns>
         public bool Contains(Direction flag)
         {
-            if (flag == Direction.Idle)
+            if (flag == Direction.None)
                 return (direction & ~flag) == flag;
             return (direction & flag) == flag;
         }

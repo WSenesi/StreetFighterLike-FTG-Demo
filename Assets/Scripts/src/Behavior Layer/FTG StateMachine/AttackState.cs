@@ -1,86 +1,54 @@
 using UnityEngine;
-using UnityHFSM;
 
 namespace src.Behavior_Layer.FTG_StateMachine
 {
-    public class AttackState<TStateID> : StateBase<TStateID>
+    public class AttackState<TStateID> : BehaviorState<TStateID>
     {
-        private MoveBehaviorSO behaviorData;
-        private int currentFrameInState;
-        private int nextEventIndex;
-        private readonly string MoveCompleteTrigger; 
+        private readonly AttackConfigSO _behaviorData;
+        private int _currentFrameInState;
+        private int _nextEventIndex;
+        private readonly string _moveCompleteTrigger; 
         
-        public int CurrentFrameInState => currentFrameInState;
+        public int CurrentFrameInState => _currentFrameInState;
 
-        public AttackState(MoveBehaviorSO behaviorData, string moveCompleteTrigger,
+        public AttackState(AttackConfigSO behaviorData, string moveCompleteTrigger,
             bool needsExitTime, bool isGhostState = false) : base(needsExitTime, isGhostState)
         {
-            this.behaviorData = behaviorData;
-            this.MoveCompleteTrigger = moveCompleteTrigger;
+            this._behaviorData = behaviorData;
+            this._moveCompleteTrigger = moveCompleteTrigger;
         }
 
-        public override void Init()
+        protected override void OnEnter(ContextData context)
         {
-            base.Init();
-        }
-
-        public override void OnEnter()
-        {
-            if (fsm is not FTGStateMachine<MoveBehaviorSO> FTGfsm)
-            {
-                Debug.LogError("StateMachine is null or not a FTGStateMachine.");
-                return;
-            }
-            
-            OnEnter(FTGfsm.ContextData);
-        }
-
-        private void OnEnter(ContextData context)
-        {
-            currentFrameInState = 0;
-            nextEventIndex = 0;
+            _currentFrameInState = 0;
+            _nextEventIndex = 0;
 
             ProcessEvents(context);
         }
 
-        public override void OnLogic()
+        protected override void OnLogic(ContextData context)
         {
-            if (fsm is not FTGStateMachine<MoveBehaviorSO> FTGfsm)
-            {
-                Debug.LogError("StateMachine is null or not a FTGStateMachine.");
-                return;
-            }
-            
-            OnLogic(FTGfsm.ContextData);
-        }
-
-        private void OnLogic(ContextData context)
-        {
-            currentFrameInState++;
+            _currentFrameInState++;
             
             ProcessEvents(context);
 
-            if (currentFrameInState >= behaviorData.duration)
+            if (_currentFrameInState >= _behaviorData.duration)
             {
-                (fsm as StateMachine)?.Trigger(MoveCompleteTrigger); 
+                FtgFSM.Trigger(_moveCompleteTrigger); 
             }
-        }
-
-        public override void OnExit()
-        {
-            base.OnExit();
         }
         
         private void ProcessEvents(ContextData context)
         {
-            if (behaviorData is null) return;
+            if (_behaviorData is null) return;
             
-            var events = behaviorData.events;
-            while (nextEventIndex < events.Count &&
-                   events[nextEventIndex].startFrame <= currentFrameInState)
+            var events = _behaviorData.events;
+            while (_nextEventIndex < events.Count &&
+                   events[_nextEventIndex].startFrame <= _currentFrameInState)
             {
-                events[nextEventIndex].Execute(context);
-                nextEventIndex++;
+                Debug.Log($"Execute Event:{events[_nextEventIndex].GetType().Name}");
+                events[_nextEventIndex].Execute(context);
+                _nextEventIndex++;
             }
         }
     }

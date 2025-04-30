@@ -5,6 +5,7 @@ using Sirenix.Serialization;
 using src;
 using src.Behavior_Layer;
 using src.Input_Layer;
+using src.PresentationLayer;
 using src.Request_Layer;
 using UnityEngine;
 
@@ -26,7 +27,7 @@ public class Character : SerializedMonoBehaviour
     [NonSerialized, OdinSerialize] public RequestLayer requestLayer;
     [NonSerialized, OdinSerialize] public BehaviorLayer behaviorLayer;
 
-    private ContextData _context;
+    [OdinSerialize] private ContextData _context;
     
     private void Awake()
     {
@@ -44,13 +45,13 @@ public class Character : SerializedMonoBehaviour
     {
         inputLayer.Start();
         requestLayer.Start();
-        //behaviorLayer.Start();
+        behaviorLayer.Start();
     }
 
     private void Update()
     {
         inputLayer.Update();
         requestLayer.Update();
-        //behaviorLayer.Update();
+        behaviorLayer.Update();
     }
 }
