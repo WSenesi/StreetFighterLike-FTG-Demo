@@ -541,7 +541,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 0f07f937103f9fd49ab39adff0b97ddb, type: 3}
       propertyPath: m_RootOrder
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 0f07f937103f9fd49ab39adff0b97ddb, type: 3}
       propertyPath: m_LocalPosition.x
@@ -619,6 +619,7 @@ GameObject:
   - component: {fileID: 1344962686}
   - component: {fileID: 1344962685}
   - component: {fileID: 1344962684}
+  - component: {fileID: 1344962688}
   m_Layer: 0
   m_Name: Player2
   m_TagString: Untagged
@@ -636,7 +637,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5
+  m_Radius: 0.3
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
@@ -706,6 +707,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &1344962688
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344962683}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 120
+  m_CollisionDetection: 0
 --- !u!1 &1543059619
 GameObject:
   m_ObjectHideFlags: 0
@@ -872,6 +889,37 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!1 &1591481672
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1591481673}
+  m_Layer: 0
+  m_Name: Ground Check
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1591481673
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591481672}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.7, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1673200929}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1599361642
 GameObject:
   m_ObjectHideFlags: 0
@@ -885,7 +933,7 @@ GameObject:
   - component: {fileID: 1599361644}
   - component: {fileID: 1599361643}
   - component: {fileID: 1599361647}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1099,6 +1147,7 @@ GameObject:
   - component: {fileID: 1673200929}
   - component: {fileID: 1673200931}
   - component: {fileID: 1673200930}
+  - component: {fileID: 1673200933}
   - component: {fileID: 1673200927}
   - component: {fileID: 1673200928}
   - component: {fileID: 1673200926}
@@ -1120,7 +1169,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5
+  m_Radius: 0.3
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
@@ -1186,6 +1235,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1591481673}
   - {fileID: 1300459052}
   m_Father: {fileID: 0}
   m_RootOrder: 6
@@ -1268,16 +1318,20 @@ MonoBehaviour:
     - Name: animationController
       Entry: 6
       Data: 
+    - Name: motor
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
   player: {fileID: 1673200929}
   opponent: {fileID: 1344962687}
   animationController: {fileID: 1673200930}
+  motor: {fileID: 1673200933}
   characterMoveRequests:
   - {fileID: 11400000, guid: b9a0f8a6abe75f540835a9394dfe3f66, type: 2}
   - {fileID: 11400000, guid: d87266765bf039045adcfa108a1a25c1, type: 2}
-  - {fileID: 11400000, guid: 2f8045b2bb43cff428b13dd170990672, type: 2}
+  - {fileID: 11400000, guid: b0b59ab9862e9084a8d69ffc9b3bc714, type: 2}
   - {fileID: 11400000, guid: 2f8045b2bb43cff428b13dd170990672, type: 2}
   - {fileID: 11400000, guid: 38308c567660bcc4694a5c052ff3eab2, type: 2}
   - {fileID: 11400000, guid: 16e81f88df8533f47a70411437c9f99e, type: 2}
@@ -1303,6 +1357,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 120
   m_CollisionDetection: 0
+--- !u!114 &1673200933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1673200923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6e0a6edbba94c64a338f365469741d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  groundCheckPoint: {fileID: 1591481673}
+  groundCheckRadius: 0.3
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  gravityMultiplier: 2
 --- !u!1 &2071128239
 GameObject:
   m_ObjectHideFlags: 0

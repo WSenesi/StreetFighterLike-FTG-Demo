@@ -25,9 +25,11 @@ namespace src
         
         // TODO: Component
         public AnimationController animationController;
-        
+        public CharacterMotor motor;
 
-        public ContextData(Transform owner, Transform opponent, AnimationController animationController,
+        public ContextData(Transform owner, Transform opponent, 
+            AnimationController animationController,
+            CharacterMotor motor,
             BaseBehaviorConfigSO currentStateID = null,
             CharacterContextFlag currentContextFlag = CharacterContextFlag.None
             )
@@ -35,6 +37,7 @@ namespace src
             this.owner = owner;
             this.opponent = opponent;
             this.animationController = animationController;
+            this.motor = motor;
             this.currentStateID = currentStateID;
             this.currentContextFlag = currentContextFlag;
             

@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace src.Behavior_Layer.FTG_StateMachine
 {
     public class MovementState<TStateID> : BehaviorState<TStateID>
@@ -21,26 +19,30 @@ namespace src.Behavior_Layer.FTG_StateMachine
             
             // 播放动画
             context.animationController?.PlayAnimation(_behaviorData.loopAnimation);
+            
+            var xDir = GetXAxisDir(context.isFacingRight, _walkDirection);
+            context.motor.SetHorizontalMovement(xDir, _speed);
         }
 
         protected override void OnLogic(ContextData context)
         {
             // 更新位置
-            var transform = context.owner;
-            var xDir = GetXAxisDir(context.isFacingRight, _walkDirection);
-            transform.position += _speed * Time.deltaTime * xDir;
+            // var xDir = GetXAxisDir(context.isFacingRight, _walkDirection);
+            // var transform = context.owner;
+            // transform.position += _speed * Time.deltaTime * xDir;
+            // context.motor.SetHorizontalMovement(xDir, _speed);
         }
 
         protected override void OnExit(ContextData context)
         {
-            base.OnExit(context);
+            context.motor.SetHorizontalMovement(0, _speed);
         }
 
-        private Vector3 GetXAxisDir(bool isFacingRight, WalkDirection walkDirection)
+        private int GetXAxisDir(bool isFacingRight, WalkDirection walkDirection)
         {
             bool isForward = walkDirection == WalkDirection.Forward;
             bool isPositiveDirection = !(isFacingRight ^ isForward);
-            return isPositiveDirection ? Vector3.right : Vector3.left;
+            return isPositiveDirection ? 1 : -1;
         }
     }
 }

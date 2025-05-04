@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace src.Behavior_Layer.FTG_StateMachine
 {
     public class JumpState<TStateID> : BehaviorState<TStateID>
@@ -31,6 +33,9 @@ namespace src.Behavior_Layer.FTG_StateMachine
             
             // 播放动画
             context.animationController?.PlayAnimation(_behaviorData.jumpAnimation);
+            
+            // 
+            context.motor.RequestJump(new Vector2(_horizontalVelocity, _verticalVelocity));
         }
 
         protected override void OnLogic(ContextData contextData)

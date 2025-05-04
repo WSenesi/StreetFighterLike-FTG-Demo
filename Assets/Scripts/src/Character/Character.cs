@@ -15,6 +15,7 @@ public class Character : SerializedMonoBehaviour
     public Transform player;
     public Transform opponent;
     public AnimationController animationController;
+    public CharacterMotor motor;
     
     // Config
     [Tooltip("角色招式输入配置，列表索引越小优先级越高")] 
@@ -32,7 +33,7 @@ public class Character : SerializedMonoBehaviour
     private void Awake()
     {
         // 初始化 ContextData
-        _context = new ContextData(player, opponent, animationController);
+        _context = new ContextData(player, opponent, animationController, motor);
         
         // 初始化三层
         inputLayer = new InputLayer(_context);
