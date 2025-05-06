@@ -9,11 +9,11 @@ namespace src.PresentationLayer
     /// 行走通过Rigidbody.MovePosition实现，提供直接控制感并尊重碰撞。
     /// Z轴位置将被强制固定。
     /// </summary>
-    [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
+    [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
     public class CharacterMotor : MonoBehaviour
     {
-        private Rigidbody _rb;
-        private CapsuleCollider _collider; // 获取Collider引用，可能用于获取尺寸信息
+        private Rigidbody2D _rb;
+        private Collider2D _collider; // 获取Collider引用，可能用于获取尺寸信息
 
         // --- 可配置参数 ---
         // [Header("移动配置")]
@@ -26,49 +26,38 @@ namespace src.PresentationLayer
         [SerializeField] private LayerMask groundLayer; // 定义哪些层是“地面”
         [SerializeField] private float gravityMultiplier = 2.0f; // 重力乘数，用于调整跳跃手感 (基于物理设置里的重力)
 
+        [Header("视觉朝向")]
+        [Tooltip("需要翻转以改变朝向的Transform（通常是包含Sprite或模型的主体）。如果为空，则使用此GameObject的Transform。")]
+        [SerializeField] private Transform visualTransform; // 用于视觉翻转的Transform
+        
         // --- 运行时状态 ---
-        private bool _isGrounded = false; // 角色当前是否在地面上
-        private float _fixedZPosition = 0f; // 角色需要保持的固定Z轴坐标
-        private Vector3 _currentMovementInput = Vector3.zero; // 当前帧期望的主动移动向量 (由外部设置)
-        private bool _jumpRequested = false; // 是否请求了跳跃
-        private Vector3 _requestedJumpVelocity = Vector3.zero;
+        private bool _isGrounded; // 角色当前是否在地面上
+        private Vector2 _currentMovementInput = Vector2.zero; // 当前帧期望的主动移动向量 (由外部设置)
+        private bool _jumpRequested; // 是否请求了跳跃
+        private Vector2 _requestedJumpVelocity = Vector2.zero;
+        private int _targetFacingDirection = 1;
 
         #region Unity生命周期
 
         private void Awake()
         {
-            _rb = GetComponent<Rigidbody>();
-            _collider = GetComponent<CapsuleCollider>(); // 获取Collider引用
+            _rb = GetComponent<Rigidbody2D>();
+            _collider = GetComponent<Collider2D>(); 
 
             // --- 初始化Rigidbody设置 ---
-            // 冻结旋转，防止角色摔倒
-            _rb.constraints = RigidbodyConstraints.FreezeRotation;
-            // 冻结Z轴位置移动 (重要!)
-            _rb.constraints |= RigidbodyConstraints.FreezePositionZ;
-
-            // 推荐设置，提高物理模拟的稳定性和平滑度
-            _rb.interpolation = RigidbodyInterpolation.Interpolate; // 平滑视觉移动
-            _rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic; // 最精确的碰撞检测，适合快速移动的角色
-            // _rb.sleep = RigidbodySleepMode.NeverSleep; // 确保角色始终活动
-
-            // 记录初始Z轴位置作为固定值
-            _fixedZPosition = transform.position.z;
-
-            // 确保初始位置的Z轴正确
-            ForceZPosition();
+            _rb.constraints = RigidbodyConstraints2D.FreezeRotation;        // 冻结旋转，防止角色摔倒
+            _rb.interpolation = RigidbodyInterpolation2D.Interpolate;       // 平滑视觉移动
+            _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // 最精确的碰撞检测，适合快速移动的角色
+            _rb.sleepMode = RigidbodySleepMode2D.NeverSleep;                // 确保角色始终活动
+            
+            visualTransform ??= transform;
+            ApplyVisualFacingDirection();
         }
 
         private void Update()
         {
             // 每帧更新非物理相关的状态，例如地面检测
             UpdateGroundedStatus();
-
-            // (可选) 在Update中处理跳跃请求的检测，以获得更快的响应
-            // 但实际施加力必须在FixedUpdate中
-            // if (Input.GetButtonDown("Jump") && isGrounded) // 示例: 直接读取输入
-            // {
-            //     RequestJump();
-            // }
         }
 
         private void FixedUpdate()
@@ -83,12 +72,12 @@ namespace src.PresentationLayer
 
             // 3. 应用主动移动 (行走/跑步)
             ApplyActiveMovement();
+            
+        }
 
-            // 4. (可选但推荐) 强制修正Z轴位置，防止微小物理误差累积
-            ForceZPosition();
-
-            // 清理本帧的移动输入意图，等待下一帧的指令
-            // currentMovementInput = Vector3.zero; // 如果外部是持续调用SetHorizontalMovement则不需要这句
+        private void LateUpdate()
+        {
+            ApplyVisualFacingDirection();
         }
 
         #endregion
@@ -99,14 +88,13 @@ namespace src.PresentationLayer
         /// 强制设置角色位置。会停止当前速度并移动到目标点。
         /// 用于回合开始、重置、特殊技能（如瞬移）等场景。
         /// </summary>
-        /// <param name="position">目标世界坐标 (X, Y)。Z轴会被自动修正。</param>
+        /// <param name="position">目标世界坐标 (X, Y)。</param>
         public void SetPosition(Vector2 position)
         {
-            Vector3 targetPosition = new Vector3(position.x, position.y, _fixedZPosition);
             // Debug.Log($"[Movement] SetPosition: {targetPosition}");
-            _rb.velocity = Vector3.zero; // 停止当前物理速度
-            _rb.position = targetPosition; // 直接设置Rigidbody的位置
-            _currentMovementInput = Vector3.zero; // 重置主动移动意图
+            _rb.velocity = Vector2.zero; // 停止当前物理速度
+            _rb.position = position; // 直接设置Rigidbody的位置
+            _currentMovementInput = Vector2.zero; // 重置主动移动意图
         }
 
         /// <summary>
@@ -117,10 +105,9 @@ namespace src.PresentationLayer
         /// <param name="speed">移动速度 (若小于0，则使用默认速度)。</param>
         public void SetHorizontalMovement(float horizontalDirection, float speed)
         {
-            var targetSpeed = speed;
             // 只设置X轴移动意图，Y轴由跳跃和重力控制
-            _currentMovementInput.x = horizontalDirection * targetSpeed;
-            // Debug.Log($"[Movement] SetHorizontalMovement: Dir={horizontalDirection}, Speed={targetSpeed}, InputX={currentMovementInput.x}");
+            _currentMovementInput.x = horizontalDirection * speed;
+            // Debug.Log($"[Movement] SetHorizontalMovement: Dir={horizontalDirection}, Speed={speed}, InputX={currentMovementInput.x}");
         }
 
         /// <summary>
@@ -145,17 +132,28 @@ namespace src.PresentationLayer
         /// </summary>
         /// <param name="forceXY">施加的力向量 (X, Y分量有效)。</param>
         /// <param name="mode">力的模式 (Impulse通常用于瞬间击打)。</param>
-        public void ApplyForce(Vector2 forceXY, ForceMode mode = ForceMode.Impulse)
+        public void ApplyForce(Vector2 forceXY, ForceMode2D mode = ForceMode2D.Impulse)
         {
-            Vector3 force = new Vector3(forceXY.x, forceXY.y, 0); // 确保Z轴力为0
+            var force = new Vector2(forceXY.x, forceXY.y); // 确保Z轴力为0
             // Debug.Log($"[Movement] ApplyForce: {force}, Mode: {mode}");
             // 考虑：是否要在施加力之前清除部分或全部现有速度？
             // 例如，被击飞时可能需要重置之前的移动速度
-            // rb.velocity = new Vector3(0, 0, 0); // 如果需要完全覆盖之前的速度
+            _rb.velocity = Vector2.zero; // 如果需要完全覆盖之前的速度
 
             _rb.AddForce(force, mode);
         }
 
+        /// <summary>
+        /// 设置角色期望的视觉朝向。
+        /// 由行为层调用，告知表现层应该朝向哪边。
+        /// </summary>
+        /// <param name="isFacingRight">true 表示朝右, false 表示朝左。</param>
+        public void SetFacingDirection(bool isFacingRight)
+        {
+            // 简单验证输入
+            _targetFacingDirection = isFacingRight ? 1 : -1;
+            // 注意：实际的视觉更新发生在LateUpdate中
+        }
         #endregion
 
         #region 内部逻辑
@@ -167,9 +165,9 @@ namespace src.PresentationLayer
         {
             if (groundCheckPoint is null) return;
 
-            // 使用Physics.CheckSphere进行3D地面检测
-            _isGrounded = Physics.CheckSphere(groundCheckPoint.position, groundCheckRadius, groundLayer, QueryTriggerInteraction.Ignore);
-
+            // 地面检测
+            var hit = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayer);
+            _isGrounded = hit is not null;
             // Optional: 如果需要更精确的检测（例如斜坡），可以使用Physics.Raycast或Physics.SphereCast向下发射射线
         }
 
@@ -183,8 +181,8 @@ namespace src.PresentationLayer
             if (Mathf.Abs(_currentMovementInput.x) > 0.01f)
             {
                 // 计算本FixedUpdate帧的目标移动位置
-                Vector3 horizontalDisplacement = new Vector3(_currentMovementInput.x, 0, 0) * Time.fixedDeltaTime;
-                Vector3 nextPosition = _rb.position + horizontalDisplacement;
+                var horizontalDisplacement = new Vector2(_currentMovementInput.x, 0) * Time.fixedDeltaTime;
+                var nextPosition = _rb.position + horizontalDisplacement;
 
                 // 使用MovePosition移动，它会尝试移动到目标位置，并处理碰撞
                 _rb.MovePosition(nextPosition);
@@ -208,7 +206,7 @@ namespace src.PresentationLayer
             if (_isGrounded)
             {
                 // 直接设置速度，覆盖当前速度
-                _rb.velocity = new Vector3(_requestedJumpVelocity.x, _requestedJumpVelocity.y);
+                _rb.velocity = new Vector2(_requestedJumpVelocity.x, _requestedJumpVelocity.y);
                 // 跳跃后立即标记为不在地面，避免连续跳跃（如果需要）
                 _isGrounded = false;
             }
@@ -222,36 +220,29 @@ namespace src.PresentationLayer
         private void ApplyCustomGravity()
         {
             // 只有在空中时才施加额外的重力
-            if (!_isGrounded && _rb.velocity.y < 0) // 只在下落时增强重力，使上升阶段更平缓 (可选)
-            // if (!isGrounded) // 或者只要在空中就增强重力
+            // if (!_isGrounded && _rb.velocity.y < 0) // 只在下落时增强重力，使上升阶段更平缓 (可选)
+            if (!_isGrounded) // 或者只要在空中就增强重力
             {
                 // Physics.gravity 是全局重力设置 (通常是 Vector3(0, -9.81f, 0))
-                _rb.AddForce(Physics.gravity * ((gravityMultiplier - 1f) * _rb.mass)); // 施加额外的重力
-                // 注意：这里乘以rb.mass是因为AddForce默认考虑质量，而Physics.gravity是加速度。
-                // 或者直接修改速度：rb.velocity += Physics.gravity * (gravityMultiplier - 1f) * Time.fixedDeltaTime;
+                _rb.AddForce(Physics2D.gravity * ((gravityMultiplier - 1f) * _rb.mass)); // 施加额外的重力
+                // 注意：这里乘以rb.mass是因为AddForce默认考虑质量，而Physics2D.gravity是加速度。
+                // 或者直接修改速度：
+                _rb.velocity += Physics2D.gravity * ((gravityMultiplier - 1f) * Time.fixedDeltaTime);
             }
             // 如果不使用自定义重力，Rigidbody会自动应用场景设置的重力
         }
 
-        /// <summary>
-        /// 强制将角色的Z轴位置设定为固定的值。
-        /// </summary>
-        private void ForceZPosition()
+        private void ApplyVisualFacingDirection()
         {
-            Vector3 currentPos = _rb.position;
-            if (!Mathf.Approximately(currentPos.z, _fixedZPosition))
+            var currentScaleX = visualTransform.localScale.x;
+            var targetScaleX = Mathf.Abs(currentScaleX) * _targetFacingDirection;
+
+            if (!Mathf.Approximately(currentScaleX, targetScaleX))
             {
-                _rb.position = new Vector3(currentPos.x, currentPos.y, _fixedZPosition);
-                // 如果速度也有Z分量（理论上不应该有），也清零
-                if (!Mathf.Approximately(_rb.velocity.z, 0f))
-                {
-                     _rb.velocity = new Vector3(_rb.velocity.x, _rb.velocity.y, 0);
-                }
-                // Debug.LogWarning($"[Movement] Corrected Z position from {currentPos.z} to {fixedZPosition}");
+                visualTransform.localScale = 
+                    new Vector3(targetScaleX, visualTransform.localScale.y, visualTransform.localScale.z);
             }
         }
-
-
         #endregion
 
         #region Gizmos (调试用)
@@ -279,6 +270,12 @@ namespace src.PresentationLayer
         /// 获取角色当前的物理速度。
         /// </summary>
         public Vector3 CurrentVelocity => _rb.velocity;
+        
+        /// <summary>
+        /// 获取当前应用的视觉朝向。
+        /// 注意：这反映了视觉上的朝向，可能与行为层计算的目标朝向有瞬间差异。
+        /// </summary>
+        public bool FacingRight => _targetFacingDirection == 1;
 
         #endregion
     }

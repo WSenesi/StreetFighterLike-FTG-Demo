@@ -13,6 +13,7 @@ public class BehaviorLayer
     
     // TODO: Other Component
     private AnimationController _animationController;
+    private CharacterMotor _characterMotor;
     
     private ReqPriorityQueue<RequestSO> _generatedRequests;
     private FTGStateMachine<BaseBehaviorConfigSO> _fsm;
@@ -24,6 +25,9 @@ public class BehaviorLayer
         _generatedRequests = requestLayer.generatedRequests;
         this.stateGraphConfig = stateGraphConfig;
         this._contextData = contextData;
+        
+        _animationController = contextData.animationController;
+        _characterMotor = contextData.motor;
     }
     
     public void Start()
@@ -44,6 +48,9 @@ public class BehaviorLayer
         
         // 3. 执行状态
         _fsm.OnLogic();
+        
+        // 设置朝向
+        _characterMotor.SetFacingDirection(_contextData.isFacingRight);
     }
 
     private void UpdateContextData()

@@ -32,6 +32,10 @@ public class Character : SerializedMonoBehaviour
     
     private void Awake()
     {
+        // 获取组件引用
+        animationController ??= GetComponent<AnimationController>();
+        motor ??= GetComponent<CharacterMotor>();
+        
         // 初始化 ContextData
         _context = new ContextData(player, opponent, animationController, motor);
         
@@ -51,8 +55,10 @@ public class Character : SerializedMonoBehaviour
 
     private void Update()
     {
+        _context.isGrounded = motor.IsGrounded;
         inputLayer.Update();
         requestLayer.Update();
         behaviorLayer.Update();
+        
     }
 }

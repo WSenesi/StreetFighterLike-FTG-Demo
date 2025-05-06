@@ -34,23 +34,42 @@ namespace src.Behavior_Layer.FTG_StateMachine
             // 播放动画
             context.animationController?.PlayAnimation(_behaviorData.jumpAnimation);
             
-            // 
-            context.motor.RequestJump(new Vector2(_horizontalVelocity, _verticalVelocity));
+            
         }
 
-        protected override void OnLogic(ContextData contextData)
+        protected override void OnLogic(ContextData context)
         {
             _currentFrameInState++;
             
-            if (_currentFrameInState >= _duration)
+            if (_currentFrameInState == 4)
+            {
+                // 执行角色移动
+                var xDir = GetXAxisDir(context.isFacingRight, _jumpDirection);
+                context.motor.RequestJump( new Vector2(_horizontalVelocity * xDir, _verticalVelocity) );
+            }
+            else if (_currentFrameInState >= _duration)
             {
                 FtgFSM.RequestStateChange(_defaultStateID); 
             }
         }
 
-        protected override void OnExit(ContextData contextData)
+        protected override void OnExit(ContextData context)
         {
-            base.OnExit(contextData);
+            base.OnExit(context);
+        }
+        
+        private int GetXAxisDir(bool isFacingRight, JumpDirection jumpDirection)
+        {
+            switch (jumpDirection)
+            {
+                case JumpDirection.Forward:
+                    return isFacingRight ? 1 : -1;
+                case JumpDirection.Backward:
+                    return isFacingRight ? -1 : 1;
+                case JumpDirection.Neutral:
+                default:
+                    return 0;
+            }
         }
     }
 }

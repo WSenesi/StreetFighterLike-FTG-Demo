@@ -4,9 +4,9 @@ namespace src.Behavior_Layer
 {
     public enum JumpDirection
     {
-        Neutral,
-        Forward,
-        Backward,
+        Neutral = 0,
+        Forward = 1,
+        Backward = -1,
     }
     
     [CreateAssetMenu(fileName = "Jump Config", menuName = "Character/Behavior/Jump")]

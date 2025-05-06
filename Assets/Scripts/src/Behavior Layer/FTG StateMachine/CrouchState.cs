@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace src.Behavior_Layer.FTG_StateMachine
 {
     public class CrouchState<TStateID> : BehaviorState<TStateID>
@@ -17,15 +19,17 @@ namespace src.Behavior_Layer.FTG_StateMachine
             context.animationController?.PlayAnimation(_behaviorData.crouchDownAnimation);
         }
 
-        protected override void OnLogic(ContextData contextData)
+        protected override void OnLogic(ContextData context)
         {
-            base.OnLogic(contextData);
+            base.OnLogic(context);
             
         }
 
-        protected override void OnExit(ContextData contextData)
+        protected override void OnExit(ContextData context)
         {
-            base.OnExit(contextData);
+            // 播放站起动画
+            Debug.Log($"Exiting Crouch State: {_behaviorData.standUpAnimation.name}");
+            context.animationController?.PlayAnimation(_behaviorData.standUpAnimation);
         }
     }
 }
