@@ -5,7 +5,11 @@ namespace src.Behavior_Layer.EventConfig
 {
     public enum AttackType
     {
-        // TODO: 上中下段+投技    
+        // 上中下段+投技    
+        High,
+        Low,
+        Overhead,
+        Throw,
     }
 
     [Serializable]
