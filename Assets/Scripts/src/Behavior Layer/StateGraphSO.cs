@@ -24,9 +24,10 @@ namespace src.Behavior_Layer
         // public BaseBehaviorConfigSO defaultState;
         [Tooltip("招式完成时的触发器名称")] public string moveCompleteTrigger;
 
-        public static FTGStateMachine<BaseBehaviorConfigSO> BuildStateMachine(StateGraphSO stateGraph)
+        public static FTGStateMachine<BaseBehaviorConfigSO> BuildStateMachine(
+            Character character, StateGraphSO stateGraph)
         {
-            var fsm = new FTGStateMachine<BaseBehaviorConfigSO>();
+            var fsm = new FTGStateMachine<BaseBehaviorConfigSO>(character);
             BuildStates(fsm, stateGraph);
             BuildBasicTransitions(fsm, stateGraph);
             BuildAdditionalTransitions(fsm, stateGraph);

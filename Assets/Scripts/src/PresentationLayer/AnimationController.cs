@@ -1,3 +1,4 @@
+using src.Behavior_Layer;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,10 +9,24 @@ namespace src.PresentationLayer
         [SerializeField] 
         private Animator animator;
 
-        [SerializeField] private Text currentPlayingAnimation;
+        [SerializeField] 
+        private Text currentPlayingAnimation;
         
         [SerializeField] 
         private float defaultCrossFadeFrame = 0.2f;
+        
+        private Character _character;
+        private CharacterEventManager _eventManager;
+
+        private void Start()
+        {
+            _character = GetComponent<Character>();
+            _eventManager = _character.EventManager;
+            _eventManager.OnAnimationTrigger += (animationEventConfig, character) =>
+            {
+                PlayAnimation(animationEventConfig.animationClip);
+            };
+        }
 
         public void PlayAnimation(string animationName, float transitionDuration)
         {

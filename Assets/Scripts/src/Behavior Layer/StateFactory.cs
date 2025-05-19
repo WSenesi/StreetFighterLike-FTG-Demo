@@ -15,8 +15,8 @@ namespace src.Behavior_Layer
     }
     public class StateFactory
     {
-        private BaseBehaviorConfigSO _defaultStateID;
-        private string _moveCompleteTrigger;
+        private readonly BaseBehaviorConfigSO _defaultStateID;
+        private readonly string _moveCompleteTrigger;
 
         public StateFactory(BaseBehaviorConfigSO defaultStateID, string moveCompleteTrigger)
         {

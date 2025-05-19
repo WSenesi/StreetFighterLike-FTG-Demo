@@ -6,16 +6,15 @@ namespace src.Behavior_Layer.FTG_StateMachine
         where TStateID : BaseBehaviorConfigSO
     {
         public ContextData ContextData { get; set; }
+        public Character Character { get; }
+        public CharacterEventManager EventManager { get; }
 
-        public FTGStateMachine(bool needsExitTime = false, bool isGhostState = false, bool rememberLastState = false)
-            : base(needsExitTime: needsExitTime, isGhostState: isGhostState, rememberLastState: rememberLastState)
+        public FTGStateMachine(Character character, bool needsExitTime = false, 
+            bool isGhostState = false, bool rememberLastState = false)
+            : base(needsExitTime, isGhostState, rememberLastState)
         {
-            
-        }
-        
-        public override void Init()
-        {
-            base.Init();
+            this.Character = character;
+            this.EventManager = character.EventManager;
         }
 
         public override void OnLogic()

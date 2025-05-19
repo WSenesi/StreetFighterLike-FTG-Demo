@@ -9,33 +9,40 @@ namespace src.Behavior_Layer
     [Serializable]
     public class BehaviorLayer
     {
-        private StateGraphSO stateGraphConfig;
+        public Character Character { get; }
+        private StateGraphSO _stateGraphConfig;
     
         // TODO: Other Component
+        private CharacterEventManager _eventManager;
         private AnimationController _animationController;
         private CharacterMotor _characterMotor;
+        
     
         private ReqPriorityQueue<RequestSO> _generatedRequests;
         private FTGStateMachine<BaseBehaviorConfigSO> _fsm;
         private ContextData _contextData;
         private CharacterContextFlag _currentContextFlag;
 
-        public BehaviorLayer(RequestLayer requestLayer, StateGraphSO stateGraphConfig, ContextData contextData)
+        public BehaviorLayer(Character character)
         {
-            _generatedRequests = requestLayer.generatedRequests;
-            this.stateGraphConfig = stateGraphConfig;
-            this._contextData = contextData;
+            Character = character;
+            _generatedRequests = character.requestLayer.generatedRequests;
+            _eventManager = character.EventManager;
+            _stateGraphConfig = character.stateGraphConfig;
+            _contextData = character.context;
         
-            _animationController = contextData.animationController;
-            _characterMotor = contextData.motor;
+            _animationController = _contextData.animationController;
+            _characterMotor = _contextData.motor;
         }
     
         public void Start()
         {
-            _fsm = StateGraphSO.BuildStateMachine(stateGraphConfig);
+            // State 的 Init 方法在状态机 AddState 方法中调用，因此状态订阅事件的逻辑应该在构建状态机之前完成
+            _fsm = StateGraphSO.BuildStateMachine(Character, _stateGraphConfig);
             _fsm.ContextData = _contextData;
             _fsm.Init();
-        
+            
+            // TODO: 订阅事件管理器的 OnRawCollisionsDetected 
         }
 
         public void Update()

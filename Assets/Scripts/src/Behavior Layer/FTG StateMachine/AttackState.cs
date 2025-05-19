@@ -1,4 +1,5 @@
-using UnityEngine;
+using System;
+using src.Behavior_Layer.EventConfig;
 
 namespace src.Behavior_Layer.FTG_StateMachine
 {
@@ -6,10 +7,11 @@ namespace src.Behavior_Layer.FTG_StateMachine
     {
         private readonly AttackConfigSO _behaviorData;
         private int _currentFrameInState;
-        private int _nextEventIndex;
+        // private int _nextEventIndex;
         private readonly string _moveCompleteTrigger; 
         
         public int CurrentFrameInState => _currentFrameInState;
+        public CharacterEventManager EventManager { get; private set; }
 
         public AttackState(AttackConfigSO behaviorData, string moveCompleteTrigger,
             bool needsExitTime, bool isGhostState = false) : base(needsExitTime, isGhostState)
@@ -18,10 +20,15 @@ namespace src.Behavior_Layer.FTG_StateMachine
             this._moveCompleteTrigger = moveCompleteTrigger;
         }
 
+        public override void Init()
+        {
+            EventManager = FtgFSM.EventManager;
+        }
+
         protected override void OnEnter(ContextData context)
         {
             _currentFrameInState = 0;
-            _nextEventIndex = 0;
+            // _nextEventIndex = 0;
 
             ProcessEvents(context);
         }
@@ -41,14 +48,49 @@ namespace src.Behavior_Layer.FTG_StateMachine
         private void ProcessEvents(ContextData context)
         {
             if (_behaviorData is null) return;
-            
-            var events = _behaviorData.events;
-            while (_nextEventIndex < events.Count &&
-                   events[_nextEventIndex].startFrame <= _currentFrameInState)
+
+            foreach (var eventConfig in _behaviorData.events)
             {
-                Debug.Log($"Execute Event:{events[_nextEventIndex].GetType().Name}");
-                events[_nextEventIndex].Execute(context);
-                _nextEventIndex++;
+                if (_currentFrameInState == eventConfig.startFrame)
+                {
+                    // 激活事件
+                    switch (eventConfig)
+                    {
+                        case AnimationEventConfig animationEventConfig:
+                            EventManager.TriggerAnimationEvent(animationEventConfig, FtgFSM.Character);
+                            break;
+                        case HitboxEventConfig hitboxEventConfig:
+                            EventManager.RequestActivateHitbox(hitboxEventConfig, FtgFSM.Character);
+                            break;
+                        case HurtboxEventConfig hurtboxEventConfig:
+                            EventManager.RequestActivateHurtbox(hurtboxEventConfig, FtgFSM.Character);
+                            break;
+                        case SfxEventConfig sfxEventConfig:
+                        case VfxEventConfig vfxEventConfig:
+                        default:
+                            throw new NotImplementedException($"Event type {eventConfig.GetType().FullName} not implemented");
+                    }
+                }
+                else if (_currentFrameInState == eventConfig.startFrame + eventConfig.duration)
+                {
+                    // 停止事件
+                    switch (eventConfig)
+                    {
+                        case AnimationEventConfig animationEventConfig:
+                            EventManager.TriggerAnimationEvent(animationEventConfig, FtgFSM.Character);
+                            break;
+                        case HitboxEventConfig hitboxEventConfig:
+                            EventManager.RequestDeactivateHitbox(hitboxEventConfig, FtgFSM.Character);
+                            break;
+                        case HurtboxEventConfig hurtboxEventConfig:
+                            EventManager.RequestDeactivateHurtbox(hurtboxEventConfig, FtgFSM.Character);
+                            break;
+                        case SfxEventConfig sfxEventConfig:
+                        case VfxEventConfig vfxEventConfig:
+                        default:
+                            throw new NotImplementedException($"Event type {eventConfig.GetType().FullName} not implemented");
+                    }
+                }
             }
         }
     }

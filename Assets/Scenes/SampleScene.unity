@@ -133,6 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 214442700}
   - component: {fileID: 214442701}
+  - component: {fileID: 214442702}
   m_Layer: 8
   m_Name: Head
   m_TagString: Untagged
@@ -181,6 +182,18 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.75, y: 0.3}
   m_EdgeRadius: 0
+--- !u!114 &214442702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 214442699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9021778d275bf64aad7c85d9d9351bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &508098475
 GameObject:
   m_ObjectHideFlags: 0
@@ -191,6 +204,7 @@ GameObject:
   m_Component:
   - component: {fileID: 508098476}
   - component: {fileID: 508098477}
+  - component: {fileID: 508098478}
   m_Layer: 8
   m_Name: Foot
   m_TagString: Untagged
@@ -239,6 +253,18 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.75, y: 0.5}
   m_EdgeRadius: 0
+--- !u!114 &508098478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 508098475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9021778d275bf64aad7c85d9d9351bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &612263417
 GameObject:
   m_ObjectHideFlags: 0
@@ -658,6 +684,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1210921281}
   - component: {fileID: 1210921282}
+  - component: {fileID: 1210921283}
   m_Layer: 8
   m_Name: Body
   m_TagString: Untagged
@@ -706,6 +733,18 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.75, y: 1.1}
   m_EdgeRadius: 0
+--- !u!114 &1210921283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1210921280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9021778d275bf64aad7c85d9d9351bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1300459051
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1411,6 +1450,7 @@ GameObject:
   - component: {fileID: 1673200931}
   - component: {fileID: 1673200930}
   - component: {fileID: 1673200936}
+  - component: {fileID: 1673200937}
   - component: {fileID: 1673200935}
   - component: {fileID: 1673200934}
   m_Layer: 0
@@ -1480,47 +1520,8 @@ MonoBehaviour:
     - Name: behaviorLayer
       Entry: 6
       Data: 
-    - Name: _context
-      Entry: 7
-      Data: 0|src.ContextData, Assembly-CSharp
-    - Name: owner
+    - Name: context
       Entry: 6
-      Data: 
-    - Name: opponent
-      Entry: 6
-      Data: 
-    - Name: currentContextFlag
-      Entry: 3
-      Data: 0
-    - Name: currentStateID
-      Entry: 6
-      Data: 
-    - Name: dirInput
-      Entry: 3
-      Data: 0
-    - Name: atkInput
-      Entry: 3
-      Data: 0
-    - Name: distanceToOpponent
-      Entry: 4
-      Data: 0
-    - Name: healthPercent
-      Entry: 3
-      Data: 0
-    - Name: isGrounded
-      Entry: 5
-      Data: false
-    - Name: isFacingRight
-      Entry: 5
-      Data: true
-    - Name: animationController
-      Entry: 6
-      Data: 
-    - Name: motor
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
       Data: 
   player: {fileID: 1673200929}
   opponent: {fileID: 1344962687}
@@ -1595,6 +1596,18 @@ MonoBehaviour:
     m_Bits: 128
   gravityMultiplier: 2.7
   visualTransform: {fileID: 1673200929}
+--- !u!114 &1673200937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1673200923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63721d68a6274b998e27be804291842b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2071128239
 GameObject:
   m_ObjectHideFlags: 0

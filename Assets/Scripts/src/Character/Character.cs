@@ -17,6 +17,8 @@ public class Character : SerializedMonoBehaviour
     public AnimationController animationController;
     public CharacterMotor motor;
     
+    public CharacterEventManager EventManager { get; private set; }
+    
     // Config
     [Tooltip("角色招式输入配置，列表索引越小优先级越高")] 
     public List<RequestSO> characterMoveRequests;
@@ -28,21 +30,22 @@ public class Character : SerializedMonoBehaviour
     [NonSerialized, OdinSerialize] public RequestLayer requestLayer;
     [NonSerialized, OdinSerialize] public BehaviorLayer behaviorLayer;
 
-    [OdinSerialize] private ContextData _context;
+    [NonSerialized, OdinSerialize] public ContextData context;
     
     private void Awake()
     {
         // 获取组件引用
         animationController ??= GetComponent<AnimationController>();
         motor ??= GetComponent<CharacterMotor>();
+        EventManager = new CharacterEventManager();
         
         // 初始化 ContextData
-        _context = new ContextData(player, opponent, animationController, motor);
+        context = new ContextData(player, opponent, animationController, motor);
         
-        // 初始化三层
-        inputLayer = new InputLayer(_context);
+        // 初始化
+        inputLayer = new InputLayer(context);
         requestLayer = new RequestLayer(inputLayer, characterMoveRequests);
-        behaviorLayer = new BehaviorLayer(requestLayer, stateGraphConfig, _context);
+        behaviorLayer = new BehaviorLayer(this);
         
     }
 
@@ -55,7 +58,7 @@ public class Character : SerializedMonoBehaviour
 
     private void Update()
     {
-        _context.isGrounded = motor.IsGrounded;
+        context.isGrounded = motor.IsGrounded;
         inputLayer.Update();
         requestLayer.Update();
         behaviorLayer.Update();
