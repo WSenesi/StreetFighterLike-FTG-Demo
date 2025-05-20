@@ -15,7 +15,7 @@ namespace src.PresentationLayer
     
     public class JudgementHandler : MonoBehaviour
     {
-        
+        private Dictionary<string, HurtboxComponent> _hurtboxComponents = new();
         private Character _character;
         private CharacterEventManager _eventManager;
 
@@ -55,6 +55,7 @@ namespace src.PresentationLayer
             
             _eventManager = _character.EventManager;
             SubscribeToEvents();
+            InitializeHurtboxes();
         }
 
         private void FixedUpdate()
@@ -121,6 +122,29 @@ namespace src.PresentationLayer
             UnsubscribeFromEvents();
         }
 
+        private void InitializeHurtboxes()
+        {
+            var hurtboxes = GetComponentsInChildren<HurtboxComponent>();
+            foreach (var hb in hurtboxes)
+            {
+                if (hb.identifier == "")
+                {
+                    Debug.LogWarning($"Hurtbox {hb.name} on {_character.name} has no identifier.");
+                    continue;
+                }
+
+                if (_hurtboxComponents.ContainsKey(hb.identifier))
+                {
+                    Debug.LogError($"Duplicate Hurtbox Identifier '{hb.identifier}' found on Character {_character.name}. " +
+                                   $"Original: {_hurtboxComponents[hb.identifier].name}, New: {hb.name}.");
+                }
+                else
+                {
+                    _hurtboxComponents.Add(hb.identifier, hb);
+                }
+            }
+        }
+        
         private void SubscribeToEvents()
         {
             if (_eventManager is null) return;
@@ -170,16 +194,28 @@ namespace src.PresentationLayer
         }
         
         // --- Hurtbox 事件处理 ---
+        private HurtboxComponent GetHurtboxComponent(string identifier)
+        {
+            if (_hurtboxComponents.TryGetValue(identifier, out var hurtbox))
+            {
+                return hurtbox;
+            }
+            Debug.LogWarning($"Hurtbox with identifier '{identifier}' not found on Character {_character.name}.");
+            return null;
+        }
+        
         private void HandleHurtboxActivateRequest(HurtboxEventConfig config, Character owner)
         {
             if (owner != _character) return;
-            if (config.hurtboxComponent is null)
+            
+            var hurtboxComponent = GetHurtboxComponent(config.identifier);
+            if (hurtboxComponent is null)
             {
                 Debug.LogWarning($"Hurtbox component needs to be attached to a Character");
                 return;
             }
             
-            config.hurtboxComponent.Configure(
+            hurtboxComponent.Configure(
                 owner: owner, 
                 offset: config.colliderOffset, 
                 size: config.colliderSize, 
@@ -189,8 +225,9 @@ namespace src.PresentationLayer
         private void HandleHurtboxDeactivateRequest(HurtboxEventConfig config, Character owner)
         {
             if (owner != _character) return;
-
-            config.hurtboxComponent?.SetActive(owner, !config.isActive);
+            
+            var hurtboxComponent = GetHurtboxComponent(config.identifier);
+            hurtboxComponent?.SetActive(owner, !config.isActive);
             // TODO: 暂时无法处理(头身脚等)常驻的 Hurtbox 仅调整偏移和大小的逻辑
         }
 

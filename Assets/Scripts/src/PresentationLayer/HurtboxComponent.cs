@@ -10,6 +10,7 @@ namespace src.PresentationLayer
     [RequireComponent(typeof(BoxCollider2D))]
     public class HurtboxComponent : MonoBehaviour
     {
+        public string identifier;
         public Character OwnerCharacter { get; private set; }
         
         private BoxCollider2D _collider2D;
@@ -18,7 +19,7 @@ namespace src.PresentationLayer
         {
             _collider2D = GetComponent<BoxCollider2D>();
         }
-        
+
         /// <summary>
         /// 根据事件配置，激活/禁用 Hurtbox 并设置其属性
         /// </summary>
@@ -29,7 +30,7 @@ namespace src.PresentationLayer
         public void Configure(Character owner, Vector2 offset, Vector2 size, bool shouldBeActive = true)
         {
             OwnerCharacter = owner;
-            gameObject.SetActive(shouldBeActive);
+            _collider2D.enabled = shouldBeActive;
 
             if (shouldBeActive && _collider2D is not null)
             {
@@ -47,7 +48,7 @@ namespace src.PresentationLayer
         public void SetActive(Character owner, bool shouldBeActive)
         {
             OwnerCharacter = owner;
-            gameObject.SetActive(shouldBeActive);
+            _collider2D.enabled = shouldBeActive;
         }
     }
 }
