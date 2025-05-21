@@ -79,9 +79,9 @@ namespace src.PresentationLayer
                 
                 var rotation = Quaternion.Euler(0, 0, attackerTransform.eulerAngles.z);;
                 var worldOffset = rotation * relativeOffset;
-                Vector2 worldPosition =  attackerTransform.position + worldOffset;
+                Vector2 worldPosition = attackerTransform.position + worldOffset;
                 // float worldAngle = attackerTransform.eulerAngles.z + hitboxConfig.angle;
-
+                
                 var hits = Physics2D.OverlapBoxAll(worldPosition, hitboxConfig.size,
                     attackerTransform.eulerAngles.z, hitboxConfig.targetLayer);
 
@@ -133,10 +133,10 @@ namespace src.PresentationLayer
                     continue;
                 }
 
-                if (_hurtboxComponents.ContainsKey(hb.identifier))
+                if (_hurtboxComponents.TryGetValue(hb.identifier, out var component))
                 {
                     Debug.LogError($"Duplicate Hurtbox Identifier '{hb.identifier}' found on Character {_character.name}. " +
-                                   $"Original: {_hurtboxComponents[hb.identifier].name}, New: {hb.name}.");
+                                   $"Original: {component.name}, New: {hb.name}.");
                 }
                 else
                 {
@@ -258,7 +258,7 @@ namespace src.PresentationLayer
                 Matrix4x4 oldMatrix = Gizmos.matrix;
                 Gizmos.matrix = Matrix4x4.TRS(worldPosition, Quaternion.Euler(0, 0, attackerTransform.eulerAngles.z),
                     new Vector3(hitboxConfig.size.x, hitboxConfig.size.y, 0.1f));
-                Gizmos.DrawWireCube(worldPosition, hitboxConfig.size);
+                Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
                 Gizmos.matrix = oldMatrix;
             }
         }
