@@ -15,6 +15,8 @@ namespace src.Behavior_Layer
         public MovementConfigSO walkForward, walkBackward;
         public CrouchConfigSO crouch;
         public JumpConfigSO jumpNeutral, jumpForward, jumpBackward;
+        public BlockStunConfigSO blockStun;
+        public HitStunConfigSO hitStun;
         
         [Header("附加招式")]
         public List<BaseBehaviorConfigSO> behaviorConfigs;
@@ -23,6 +25,8 @@ namespace src.Behavior_Layer
         // [Header("默认状态")]
         // public BaseBehaviorConfigSO defaultState;
         [Tooltip("招式完成时的触发器名称")] public string moveCompleteTrigger;
+        [Tooltip("格挡攻击时的触发器名称")] public string blockStunTrigger;
+        [Tooltip("被攻击命中时的触发器名称")] public string hitStunTrigger;
 
         public static FTGStateMachine<BaseBehaviorConfigSO> BuildStateMachine(
             Character character, StateGraphSO stateGraph)
@@ -31,9 +35,7 @@ namespace src.Behavior_Layer
             BuildStates(fsm, stateGraph);
             BuildBasicTransitions(fsm, stateGraph);
             BuildAdditionalTransitions(fsm, stateGraph);
-            // 创建行为结束时返回至Idle的转换
-            fsm.AddTriggerTransitionFromAny(stateGraph.moveCompleteTrigger, 
-                new Transition<BaseBehaviorConfigSO>(null, stateGraph.idle));
+            
             fsm.SetStartState(stateGraph.idle);
             return fsm;
         }
@@ -49,6 +51,9 @@ namespace src.Behavior_Layer
             fsm.AddState(stateGraph.jumpNeutral, factory.Create(stateGraph.jumpNeutral));
             fsm.AddState(stateGraph.jumpForward, factory.Create(stateGraph.jumpForward));
             fsm.AddState(stateGraph.jumpBackward, factory.Create(stateGraph.jumpBackward));
+            
+            fsm.AddState(stateGraph.blockStun, factory.Create(stateGraph.blockStun));
+            fsm.AddState(stateGraph.hitStun, factory.Create(stateGraph.hitStun));
             
             // 创建附加招式状态
             var behaviorConfigs = stateGraph.behaviorConfigs;
@@ -140,13 +145,53 @@ namespace src.Behavior_Layer
                 condition: (transition) => ContainsDirection(fsm.ContextData.dirInput, Direction.Down)
             );
             
-            
             // 下蹲 到 Idle
             fsm.AddTransition(
                 from: stateGraph.crouch,
                 to: stateGraph.idle,
                 condition: (transition) => !ContainsDirection(fsm.ContextData.dirInput, Direction.Down)
             );
+            
+            // 后走、下蹲 到 防御 的触发器转换
+            fsm.AddTriggerTransition(
+                stateGraph.blockStunTrigger,
+                new Transition<BaseBehaviorConfigSO>(
+                    from: stateGraph.walkBackward,
+                    to: stateGraph.blockStun
+                )
+            );
+            fsm.AddTriggerTransition(
+                stateGraph.blockStunTrigger,
+                new Transition<BaseBehaviorConfigSO>(
+                    from: stateGraph.crouch,
+                    to: stateGraph.blockStun
+                )
+            );
+            fsm.AddTriggerTransitionFromAny(
+                stateGraph.blockStunTrigger,
+                new Transition<BaseBehaviorConfigSO>(
+                    from : null,
+                    to : stateGraph.blockStun
+                )
+            );
+            // fsm.AddTransition(
+            //     from: stateGraph.walkBackward,
+            //     to: stateGraph.blockStun,
+            //     condition: (transition) => ContainsDirection(fsm.ContextData.dirInput, Direction.Back)
+            // );
+            // fsm.AddTransition(
+            //     from: stateGraph.crouch, 
+            //     to: stateGraph.blockStun,
+            //     condition: (transition) => ContainsDirection(fsm.ContextData.dirInput, Direction.Back)
+            // );
+            
+            // 创建行为结束时返回至Idle的转换
+            fsm.AddTriggerTransitionFromAny(stateGraph.moveCompleteTrigger, 
+                new Transition<BaseBehaviorConfigSO>(null, stateGraph.idle));
+            
+            // 创建任意时刻被攻击命中时 切换到 HitStun 的转换
+            fsm.AddTriggerTransitionFromAny(stateGraph.hitStunTrigger, 
+                new Transition<BaseBehaviorConfigSO>(null, stateGraph.hitStun));
         }
 
         private static bool ContainsDirection(Direction input, Direction required)

@@ -15,13 +15,14 @@ namespace src.Input_Layer
 
         private ContextData _context;
         private bool _isInLeft = true;
+        private bool _isLocalPlayer;
 
-        public InputLayer(ContextData context)
+        public InputLayer(ContextData context, bool isLocalPlayer)
         {
             this._context = context;
             this.player = context.owner;
             this.opponent = context.opponent;
-            
+            _isLocalPlayer = isLocalPlayer;
             directionInput = new InputBuffer<DirectionSignal>();
             attackInput = new InputBuffer<AttackSignal>();
         }
@@ -35,11 +36,20 @@ namespace src.Input_Layer
         {
             _isInLeft = IsPlayerInLeft();
             _context.isFacingRight = _isInLeft;
-            DirectionInput();
-            AttackInput();
+
+            if (_isLocalPlayer)
+            {
+                ProcessLocalDirectionInput();
+                ProcessLocalAttackInput();
+            }
+            else
+            {
+                ProcessNeutralDirectionInput();
+                ProcessNeutralAttackInput();
+            }
         }
 
-        private void DirectionInput()
+        private void ProcessLocalDirectionInput()
         {
             var horizontal = Input.GetAxisRaw("Horizontal");
             var vertical = Input.GetAxisRaw("Vertical");
@@ -104,7 +114,7 @@ namespace src.Input_Layer
             _context.dirInput = direction;
         }
 
-        private void AttackInput()
+        private void ProcessLocalAttackInput()
         {
             bool lightPunch = Input.GetKey(KeyCode.U);
             bool lightKick = Input.GetKey(KeyCode.J);
@@ -167,6 +177,38 @@ namespace src.Input_Layer
             _context.atkInput = attack;
         }
 
+        private void ProcessNeutralDirectionInput()
+        {
+            Direction direction = Direction.None;
+            DirectionSignal signal = directionInput.Read(0);
+
+            if (signal != null && direction == signal.direction)
+            {
+                signal.duration = signal.duration >= 99 ? 99 : signal.duration + 1;
+            }
+            else
+            {
+                directionInput.Write(new DirectionSignal(direction, 1));
+            }
+            _context.dirInput = direction;
+        }
+
+        private void ProcessNeutralAttackInput()
+        {
+            Attack attack = Attack.None;
+            AttackSignal signal = attackInput.Read(0);
+
+            if (signal != null && attack == signal.attack)
+            {
+                signal.duration = signal.duration >= 99 ? 99 : signal.duration + 1;
+            }
+            else
+            {
+                attackInput.Write(new AttackSignal(attack, 1));
+            }
+            _context.atkInput = attack;
+        }
+        
         private bool IsPlayerInLeft()
         {
             return player.position.x < opponent.position.x;

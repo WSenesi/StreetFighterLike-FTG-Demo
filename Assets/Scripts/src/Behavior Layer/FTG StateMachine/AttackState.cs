@@ -27,9 +27,11 @@ namespace src.Behavior_Layer.FTG_StateMachine
 
         protected override void OnEnter(ContextData context)
         {
+            // 刷新攻击招式的运行时缓存
+            FtgFSM.Character.behaviorLayer.ResetAttackStateRuntimeData();
             _currentFrameInState = 0;
             // _nextEventIndex = 0;
-
+            
             ProcessEvents(context);
         }
 
@@ -45,6 +47,30 @@ namespace src.Behavior_Layer.FTG_StateMachine
             }
         }
         
+        /// <summary>
+        /// 攻击被打断时应当清除当前执行中的判定事件
+        /// </summary>
+        /// <param name="contextData"></param>
+        protected override void OnExit(ContextData contextData)
+        {
+            if (_behaviorData is not null && EventManager is not null)
+            {
+                foreach (var eventConfig in _behaviorData.events)
+                {
+                    switch (eventConfig)
+                    {
+                        case HitboxEventConfig hitboxEventConfig:
+                            EventManager.RequestDeactivateHitbox(hitboxEventConfig, FtgFSM.Character);
+                            break;
+                        case HurtboxEventConfig hurtboxEventConfig:
+                            EventManager.RequestDeactivateHurtbox(hurtboxEventConfig, FtgFSM.Character);
+                            break;
+                    }
+                }
+            }
+            base.OnExit(contextData);
+        }
+
         private void ProcessEvents(ContextData context)
         {
             if (_behaviorData is null) return;

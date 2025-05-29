@@ -18,6 +18,7 @@ namespace src.PresentationLayer
         private void Awake()
         {
             _collider2D = GetComponent<BoxCollider2D>();
+            OwnerCharacter = GetComponent<Character>();
         }
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace src.PresentationLayer
         /// <param name="shouldBeActive">是否激活 Hurtbox</param>
         public void Configure(Character owner, Vector2 offset, Vector2 size, bool shouldBeActive = true)
         {
-            OwnerCharacter = owner;
+            // OwnerCharacter = owner;
             _collider2D.enabled = shouldBeActive;
 
             if (shouldBeActive && _collider2D is not null)
@@ -47,8 +48,13 @@ namespace src.PresentationLayer
         /// <param name="shouldBeActive">是否激活 Hurtbox</param>
         public void SetActive(Character owner, bool shouldBeActive)
         {
-            OwnerCharacter = owner;
+            // OwnerCharacter = owner;
             _collider2D.enabled = shouldBeActive;
+        }
+
+        public void SetOwnerCharacter(Character owner)
+        {
+            OwnerCharacter = owner;
         }
     }
 }

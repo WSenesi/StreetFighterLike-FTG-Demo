@@ -142,6 +142,7 @@ namespace src.PresentationLayer
                 {
                     _hurtboxComponents.Add(hb.identifier, hb);
                 }
+                hb.SetOwnerCharacter(_character);
             }
         }
         

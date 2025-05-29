@@ -11,7 +11,8 @@ namespace src.Behavior_Layer
         Crouch,
         Attack,
         Buff,
-        Stun,
+        HitStun,
+        BlockStun,
     }
     public class StateFactory
     {
@@ -40,8 +41,10 @@ namespace src.Behavior_Layer
                     return new AttackState<BaseBehaviorConfigSO>(behaviorData as AttackConfigSO, _moveCompleteTrigger, behaviorData.needsExitTime);
                 case StateType.Buff:
                     break;
-                case StateType.Stun:
-                    break;
+                case StateType.HitStun:
+                    return new HitStunState<BaseBehaviorConfigSO>(behaviorData as HitStunConfigSO, _moveCompleteTrigger, behaviorData.needsExitTime);
+                case StateType.BlockStun:
+                    return new BlockStunState<BaseBehaviorConfigSO>(behaviorData as BlockStunConfigSO, _moveCompleteTrigger, behaviorData.needsExitTime);
                 default:
                     throw new Exception("在状态生成时发生错误：错误的行为类型");
             }

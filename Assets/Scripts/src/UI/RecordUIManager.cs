@@ -21,7 +21,7 @@ namespace src.UI
         private AttackSignal m_lastAtk;
         private int m_signalDuration;
         private int m_activeCount;
-        private bool m_isInLeft = true;
+        [SerializeField] private bool m_isInLeft = true;
 
         private void Awake()
         {
@@ -44,7 +44,7 @@ namespace src.UI
 
         private void Update()
         {
-            m_isInLeft = IsPlayerInLeft();
+            m_isInLeft = character.context.isFacingRight;
             UpdateContent();
         }
 
