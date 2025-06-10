@@ -83,9 +83,10 @@ public class ReqPriorityQueue<TRequest> where TRequest : IPrioritizedExpirable
     {
         if (_head is not null)
         {
+            var nodeToRelease = _head;
             request = _head.request;
-            RemoveNode(_head);
-            ReleaseNode(_head);
+            RemoveNode(nodeToRelease);
+            ReleaseNode(nodeToRelease);
             return true;
         }
         

@@ -13,9 +13,9 @@ namespace src.Input_Layer
         public InputBuffer<DirectionSignal> directionInput;
         public InputBuffer<AttackSignal> attackInput;
 
-        private ContextData _context;
+        private readonly ContextData _context;
         private bool _isInLeft = true;
-        private bool _isLocalPlayer;
+        private readonly bool _isLocalPlayer;
 
         public InputLayer(ContextData context, bool isLocalPlayer)
         {
@@ -34,6 +34,8 @@ namespace src.Input_Layer
     
         public void Update()
         {
+            if (_context?.opponent is null) return;
+            
             _isInLeft = IsPlayerInLeft();
             _context.isFacingRight = _isInLeft;
 

@@ -8,26 +8,26 @@ namespace src.PresentationLayer
     public struct DetectedCollisionInfo
     {
         public HitboxEventConfig SrcHitboxConfig;
-        public Character Attacker;
+        public Character.Character Attacker;
         public HurtboxComponent TargetHurtbox;
-        public Character TargetCharacter;
+        public Character.Character TargetCharacter;
     }
     
     public class JudgementHandler : MonoBehaviour
     {
         private Dictionary<string, HurtboxComponent> _hurtboxComponents = new();
-        private Character _character;
+        private Character.Character _character;
         private CharacterEventManager _eventManager;
 
         private class ActiveHitboxData
         {
             public HitboxEventConfig Config { get; }
-            public Character Attacker { get; }
+            public Character.Character Attacker { get; }
             
             // 用于记录此 Hitbox 在此次激活期间击中过的目标, 防止单个 Hitbox 多帧持续命中同一目标时重复发送攻击事件
             public readonly HashSet<int> HitTargetsThisActivation = new HashSet<int>();
 
-            public ActiveHitboxData(HitboxEventConfig config, Character attacker)
+            public ActiveHitboxData(HitboxEventConfig config, Character.Character attacker)
             {
                 Config = config;
                 Attacker = attacker;
@@ -38,7 +38,7 @@ namespace src.PresentationLayer
 
         private void Start()
         {
-            _character = GetComponent<Character>();
+            _character = GetComponent<Character.Character>();
             if (_character is null)
             {
                 Debug.LogError("Character needs to be attached to a Character");
@@ -167,7 +167,7 @@ namespace src.PresentationLayer
         }
         
         // --- Hitbox 事件处理 ---
-        private void HandleHitboxActivateRequest(HitboxEventConfig config,Character attacker)
+        private void HandleHitboxActivateRequest(HitboxEventConfig config,Character.Character attacker)
         {
             if (attacker != _character) return;
             
@@ -181,7 +181,7 @@ namespace src.PresentationLayer
             _activeHitboxes.Add(new ActiveHitboxData(config, attacker));
         }
 
-        private void HandleHitboxDeactivateRequest(HitboxEventConfig config,Character attacker)
+        private void HandleHitboxDeactivateRequest(HitboxEventConfig config,Character.Character attacker)
         {
             if (attacker != _character) return;
             
@@ -205,7 +205,7 @@ namespace src.PresentationLayer
             return null;
         }
         
-        private void HandleHurtboxActivateRequest(HurtboxEventConfig config, Character owner)
+        private void HandleHurtboxActivateRequest(HurtboxEventConfig config, Character.Character owner)
         {
             if (owner != _character) return;
             
@@ -223,7 +223,7 @@ namespace src.PresentationLayer
                 shouldBeActive: config.isActive);
         }
 
-        private void HandleHurtboxDeactivateRequest(HurtboxEventConfig config, Character owner)
+        private void HandleHurtboxDeactivateRequest(HurtboxEventConfig config, Character.Character owner)
         {
             if (owner != _character) return;
             

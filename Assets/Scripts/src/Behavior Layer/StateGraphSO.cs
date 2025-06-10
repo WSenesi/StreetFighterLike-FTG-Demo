@@ -29,7 +29,7 @@ namespace src.Behavior_Layer
         [Tooltip("被攻击命中时的触发器名称")] public string hitStunTrigger;
 
         public static FTGStateMachine<BaseBehaviorConfigSO> BuildStateMachine(
-            Character character, StateGraphSO stateGraph)
+            Character.Character character, StateGraphSO stateGraph)
         {
             var fsm = new FTGStateMachine<BaseBehaviorConfigSO>(character);
             BuildStates(fsm, stateGraph);

@@ -6,10 +6,10 @@ namespace src.Behavior_Layer.FTG_StateMachine
         where TStateID : BaseBehaviorConfigSO
     {
         public ContextData ContextData { get; set; }
-        public Character Character { get; }
+        public Character.Character Character { get; }
         public CharacterEventManager EventManager { get; }
 
-        public FTGStateMachine(Character character, bool needsExitTime = false, 
+        public FTGStateMachine(Character.Character character, bool needsExitTime = false, 
             bool isGhostState = false, bool rememberLastState = false)
             : base(needsExitTime, isGhostState, rememberLastState)
         {

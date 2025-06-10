@@ -1,4 +1,6 @@
+using Mirror;
 using src.Behavior_Layer;
+using src.Behavior_Layer.EventConfig;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,25 +17,59 @@ namespace src.PresentationLayer
         [SerializeField] 
         private float defaultCrossFadeFrame = 0.2f;
         
-        private Character _character;
+        private Character.Character _character;
         private CharacterEventManager _eventManager;
+        private NetworkIdentity _networkIdentity;
+
+        private void Awake()
+        {
+            _networkIdentity = GetComponent<NetworkIdentity>();
+
+            if (animator is null)
+            {
+                animator = GetComponentInChildren<Animator>();
+            }
+
+            if (animator is null)
+            {
+                Debug.LogError($"AnimationController requires an Animator component. Disabling script.", this);
+                enabled = false;
+            }
+        }
 
         private void Start()
         {
-            _character = GetComponent<Character>();
+            _character = GetComponent<Character.Character>();
+            if (_character is null) return;
+            
             _eventManager = _character.EventManager;
-            _eventManager.OnAnimationTrigger += (animationEventConfig, character) =>
+            if (_eventManager is null) return;
+            if (_networkIdentity.isClient)
             {
-                PlayAnimation(animationEventConfig.animationClip);
-            };
+                _eventManager.OnAnimationTrigger += OnAnimationTriggered;
+            }
+
         }
 
-        public void PlayAnimation(string animationName, float transitionDuration)
+        private void OnDestroy()
         {
-            if (string.IsNullOrEmpty(animationName)) return;
-            
-            animator.CrossFade(animationName, transitionDuration);
+            if (_eventManager is not null)
+            {
+                _eventManager.OnAnimationTrigger -= OnAnimationTriggered;
+            }
         }
+
+        private void OnAnimationTriggered(AnimationEventConfig animationEventConfig, Character.Character character)
+        {
+            PlayAnimation(animationEventConfig.animationClip);
+        }
+
+        // public void PlayAnimation(string animationName, float transitionDuration)
+        // {
+        //     if (string.IsNullOrEmpty(animationName)) return;
+        //     
+        //     animator.CrossFade(animationName, transitionDuration);
+        // }
         
         /// <summary>
         /// 立即播放指定的动画片段（硬切换）。
@@ -44,15 +80,19 @@ namespace src.PresentationLayer
         /// <param name="normalizedTime">从动画的哪个时间点开始播放 (0 是开头, 1 是结尾)</param>
         public void PlayAnimation(AnimationClip clip, int layerIndex = 0, float normalizedTime = 0f)
         {
-            if (!clip || !animator)
-            {
-                // Debug.LogWarning($"AnimationClip is null or Animator not found on {gameObject.name}. Cannot play animation.");
-                return;
-            }
-            // 使用 AnimationClip 的名字作为 Animator State 的名字
-            animator.Play(clip.name, layerIndex, normalizedTime);
+            if (!this.enabled || clip is null) return;
             
-            currentPlayingAnimation.text = clip.name;
+            // 确保只有客户端实例才执行动画播放
+            if (_networkIdentity.isClient)
+            {
+                // 使用 AnimationClip 的名字作为 Animator State 的名字
+                animator.Play(clip.name, layerIndex, normalizedTime);
+                
+                // 确保在 UI Text 组件被正确赋值的情况下才去更新
+                if (currentPlayingAnimation is not null)
+                    currentPlayingAnimation.text = clip.name;
+            }
+            
         }
         
         /// <summary>
@@ -65,18 +105,20 @@ namespace src.PresentationLayer
         /// <param name="normalizedTime">从目标动画的哪个时间点开始播放 (0 是开头)</param>
         public void CrossFadeAnimation(AnimationClip clip, float crossFadeDuration = -1f, int layerIndex = 0, float normalizedTime = 0f)
         {
-            if (!clip || !animator)
-            {
-                // Debug.LogWarning($"AnimationClip is null or Animator not found on {gameObject.name}. Cannot crossfade.");
-                return;
-            }
-
-            float duration = (crossFadeDuration >= 0) ? crossFadeDuration : defaultCrossFadeFrame;
-
-            // 使用 AnimationClip 的名字作为 Animator State 的名字
-            animator.CrossFade(clip.name, duration, layerIndex, normalizedTime);
+            if (!this.enabled || clip is null) return;
             
-            currentPlayingAnimation.text = clip.name;
+            // 确保只有客户端实例才执行动画播放
+            if (_networkIdentity.isClient)
+            {
+                float duration = (crossFadeDuration >= 0) ? crossFadeDuration : defaultCrossFadeFrame;
+                
+                // 使用 AnimationClip 的名字作为 Animator State 的名字
+                animator.CrossFade(clip.name, duration, layerIndex, normalizedTime);
+                
+                // 确保在 UI Text 组件被正确赋值的情况下才去更新
+                if (currentPlayingAnimation is not null)
+                    currentPlayingAnimation.text = clip.name;
+            }
         }
     }
 }

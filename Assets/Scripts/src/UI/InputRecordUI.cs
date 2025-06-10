@@ -1,9 +1,7 @@
-﻿using System;
+﻿using src.Input_Layer;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
-// using Sirenix.OdinInspector.Editor;
 
 namespace src.UI
 {
@@ -24,24 +22,106 @@ namespace src.UI
         public GameObject hk;
         #endregion
 
-        // private RecordUIManager m_manager;
-
-        private void Start()
+        /// <summary>
+        /// Updates the entire UI component based on a given data object.
+        /// This is the primary method for controlling this UI element's state.
+        /// </summary>
+        /// <param name="data">The data object containing the input state to display.</param>
+        /// <param name="isFacingRight">The player's current orientation to correctly display directional input.</param>
+        public void UpdateDisplay(InputRecordData data, bool isFacingRight)
         {
-        
+            SetDurationText(data.Duration);
+            SetDirectionImage(data.Direction, isFacingRight);
+            SetAttackIcons(data.Attack);
         }
 
-        public void Init()
+        /// <summary>
+        /// Resets the UI to a default, inactive state.
+        /// </summary>
+        public void Clear()
         {
-            durationText.text = " 1";
+            durationText.text = "";
             directionIcon.sprite = signalIcon.noneInput;
-
             lp.SetActive(false);
             mp.SetActive(false);
             hp.SetActive(false);
             lk.SetActive(false);
             mk.SetActive(false);
             hk.SetActive(false);
+            gameObject.SetActive(false);
+        }
+
+        private void SetDirectionImage(Direction direction, bool isFacingRight)
+        {
+            // Remap direction based on player facing to get the correct icon
+            Direction iconDirection = RemapDirectionForDisplay(direction, isFacingRight);
+            
+            switch (iconDirection)
+            {
+                case Direction.Up:
+                    directionIcon.sprite = signalIcon.up;
+                    break;
+                case Direction.Up | Direction.Front: // Up-Right
+                    directionIcon.sprite = signalIcon.rightUp;
+                    break;
+                case Direction.Up | Direction.Back: // Up-Left
+                    directionIcon.sprite = signalIcon.leftUp;
+                    break;
+                case Direction.Front: // Right
+                    directionIcon.sprite = signalIcon.right;
+                    break;
+                case Direction.Back: // Left
+                    directionIcon.sprite = signalIcon.left;
+                    break;
+                case Direction.Down | Direction.Front: // Down-Right
+                    directionIcon.sprite = signalIcon.rightDown;
+                    break;
+                case Direction.Down | Direction.Back: // Down-Left
+                    directionIcon.sprite = signalIcon.leftDown;
+                    break;
+                case Direction.Down:
+                    directionIcon.sprite = signalIcon.down;
+                    break;
+                case Direction.None:
+                default:
+                    directionIcon.sprite = signalIcon.noneInput;
+                    break;
+            }
+        }
+        
+        private Direction RemapDirectionForDisplay(Direction logicalDirection, bool isFacingRight)
+        {
+            if (isFacingRight)
+            {
+                // If facing right, Front is Right, Back is Left. No change needed.
+                return logicalDirection;
+            }
+            else
+            {
+                // If facing left, the logical 'Front' and 'Back' need to be swapped for display.
+                Direction displayDirection = logicalDirection;
+                if (logicalDirection.HasFlag(Direction.Front))
+                {
+                    displayDirection &= ~Direction.Front;
+                    displayDirection |= Direction.Back;
+                }
+                else if (logicalDirection.HasFlag(Direction.Back))
+                {
+                    displayDirection &= ~Direction.Back;
+                    displayDirection |= Direction.Front;
+                }
+                return displayDirection;
+            }
+        }
+
+        private void SetAttackIcons(Attack attack)
+        {
+            lp.SetActive(attack.HasFlag(Attack.LightPunch));
+            mp.SetActive(attack.HasFlag(Attack.MediumPunch));
+            hp.SetActive(attack.HasFlag(Attack.HeavyPunch));
+            lk.SetActive(attack.HasFlag(Attack.LightKick));
+            mk.SetActive(attack.HasFlag(Attack.MediumKick));
+            hk.SetActive(attack.HasFlag(Attack.HeavyKick));
         }
 
         public void Copy(InputRecordUI target)
@@ -58,70 +138,8 @@ namespace src.UI
 
         public void SetDurationText(int duration)
         {
-            durationText.text = duration.ToString();
+            durationText.text = duration > 1 ? duration.ToString() : "";
         }
 
-        public void SetDirectionImage(string direction)
-        {
-            switch (direction)
-            {
-                case "Up":
-                    directionIcon.sprite = signalIcon.up;
-                    break;
-                case "Left Up":
-                    directionIcon.sprite = signalIcon.leftUp;
-                    break;
-                case "Right Up":
-                    directionIcon.sprite = signalIcon.rightUp;
-                    break;
-                case "Left":
-                    directionIcon.sprite = signalIcon.left;
-                    break;
-                case "None":
-                    directionIcon.sprite = signalIcon.noneInput;
-                    break;
-                case "Right":
-                    directionIcon.sprite = signalIcon.right;
-                    break;
-                case "Left Down":
-                    directionIcon.sprite = signalIcon.leftDown;
-                    break;
-                case "Down":
-                    directionIcon.sprite = signalIcon.down;
-                    break;
-                case "Right Down":
-                    directionIcon.sprite = signalIcon.rightDown;
-                    break;
-                default:
-                    throw new Exception("InputRecordUI.SetDirection(): 参数错误");
-            }
-        }
-
-        public void SetAttackIcon(string attack, bool isActive)
-        {
-            switch (attack)
-            {
-                case "LP":
-                    lp.SetActive(isActive);
-                    break;
-                case "MP":
-                    mp.SetActive(isActive);
-                    break;
-                case "HP":
-                    hp.SetActive(isActive);
-                    break;
-                case "LK":
-                    lk.SetActive(isActive);
-                    break;
-                case "MK":
-                    mk.SetActive(isActive);
-                    break;
-                case "HK":
-                    hk.SetActive(isActive);
-                    break;
-                default:
-                    throw new Exception("InputRecordUI.SetAttack(): 参数错误");
-            }
-        }
     }
 }

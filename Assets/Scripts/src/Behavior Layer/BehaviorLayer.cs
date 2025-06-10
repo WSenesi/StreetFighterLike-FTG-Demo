@@ -10,7 +10,7 @@ namespace src.Behavior_Layer
     [Serializable]
     public class BehaviorLayer
     {
-        public Character Character { get; }
+        public Character.Character Character { get; }
         private StateGraphSO _stateGraphConfig;
     
         // TODO: Other Component
@@ -27,7 +27,7 @@ namespace src.Behavior_Layer
         [SerializeField] private AttackStateRuntimeData _currentAttackStateRuntimeData = new();
         private readonly object _collisionLock = new object(); 
 
-        public BehaviorLayer(Character character)
+        public BehaviorLayer(Character.Character character)
         {
             Character = character;
             _generatedRequests = character.requestLayer.generatedRequests;
@@ -97,7 +97,7 @@ namespace src.Behavior_Layer
         /// </summary>
         /// <param name="collisions">原始碰撞数据</param>
         /// <param name="attacker">攻击方角色</param>
-        private void HandleRawCollisionsDetected(List<DetectedCollisionInfo> collisions, Character attacker)
+        private void HandleRawCollisionsDetected(List<DetectedCollisionInfo> collisions, Character.Character attacker)
         {
             // 验证攻击方
             if (attacker != Character) return;

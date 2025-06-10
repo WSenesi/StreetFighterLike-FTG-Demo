@@ -33,7 +33,7 @@ namespace src
         public AnimationController animationController;
         public CharacterMotor motor;
 
-        public ContextData(Transform owner, Transform opponent, 
+        public ContextData(Transform owner, Transform opponent,
             AnimationController animationController,
             CharacterMotor motor,
             BaseBehaviorConfigSO currentStateID = null,
@@ -47,7 +47,7 @@ namespace src
             this.currentStateID = currentStateID;
             this.currentContextFlag = currentContextFlag;
             
-            distanceToOpponent = Vector3.Distance(owner.transform.position, opponent.transform.position);
+            // distanceToOpponent = Vector3.Distance(owner.transform.position, opponent.transform.position);
             FinalizedHitsThisFrame = new List<ProcessedHitResult>();
         }
 
@@ -65,7 +65,7 @@ namespace src
     
     public struct ProcessedHitResult
     {
-        public Character TargetCharacter;
+        public Character.Character TargetCharacter;
         public HurtboxComponent TargetHurtbox;      // 具体的受击Hurtbox
         public HitboxEventConfig SourceHitboxConfig; // 造成命中的Hitbox配置
         public HitEffectData EffectToApply;
