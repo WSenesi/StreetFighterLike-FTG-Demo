@@ -4,6 +4,7 @@ using Mirror;
 using src.Behavior_Layer;
 using src.Behavior_Layer.EventConfig;
 using src.Input_Layer;
+using src.Network;
 using src.PresentationLayer;
 using src.Request_Layer;
 using UnityEngine;
@@ -53,65 +54,51 @@ namespace src.Character
 
         public override void OnStartClient()
         {
+            // 疑似与 OnOpponentIdSet 的 Hook 方法重复, 此处可能多余
             if (opponentNetId != 0)
             {
                 FindOpponentOnClient();
             }
         }
 
-        public override void OnStartServer()
+        // 负责与游戏逻辑无关的任务, 如渲染, 可视化插值等需要每一帧运行的内容
+        private void Update()
         {
-            base.OnStartServer();
-            // 主机上的角色，在被添加到GameSessionManager后，其opponent引用会被直接设置
-            // 但我们也需要一个时机来初始化它的逻辑层。
-            // 我们可以依赖 AssignOpponents 之后的一个信号
+            if (!_isGameReady) return;
+
+            motor.SetFacingDirection(context.isFacingRight);
+            // --- 阶段 6: 清理 (可选) ---
+            // requestLayer.ClearProcessedRequests(); // 清理已处理的请求
+            // _currentContextData.ClearPerFrameData(); // 清理ContextData中每帧更新的临时数据
         }
 
-        private void Update()
+        // 将游戏循环的核心逻辑移到 FixedUpdate 中
+        private void FixedUpdate()
         {
             if (!_isGameReady) return;
             
             // --- 阶段 1: 本地输入采集 ---
             if (isLocalPlayer)
             {
-                inputLayer.Update();
-                // TODO: 发送输入
-                // ClientInputUpdate();
+                inputLayer.Tick();
             }
             
             // --- 阶段 2: 主机权威逻辑
             if (isServer)
-            {   // TODO: 主机驱动逻辑帧
+            {   
                 // --- 阶段 2.1: 行为层 - 碰撞预处理 ---
-                // 从暂存区获取本帧要处理的碰撞，并进行初步的游戏规则判定（如攻击事件组命中唯一性）
-                // 此方法会更新 _currentAttackStateRuntimeData
                 behaviorLayer.ProcessCachedCollisions();
                 behaviorLayer.PopulateContextData();
     
                 // --- 阶段 2.2: 行为层 - 填充上下文数据 ---
-                // 使用更新后的 _currentAttackStateRuntimeData 和其他角色状态来填充 _currentContextData
-                // 确保 _currentContextData 反映了最新的碰撞结果和角色状态，供请求层使用
                 context.isGrounded = motor.IsGrounded;
     
                 // --- 阶段 2.3: 请求层 - 生成行为请求 ---
-                // RequestLayer读取 _currentContextData (现在包含了最新的命中确认、帧数等信息)
-                // 并结合 _inputLayer 的输入，生成行为请求 (包括可能的取消请求)
-                requestLayer.Update();
+                requestLayer.Tick();
     
                 // --- 阶段 2.4: 行为层 - 执行状态机逻辑与动作 ---
-                // BehaviorLayer 获取来自 RequestLayer 的最高优先级请求
-                // CharacterActionRequest currentActionRequest = _requestLayer.GetHighestPriorityRequest();
-                // BehaviorLayer驱动状态机处理请求、进行状态转换，并执行当前活动状态的OnLogic()
-                // 活动状态的OnLogic()会使用_currentContextData来应用效果、触发新的表现层事件等
                 behaviorLayer.ExecuteStateMachineLogic();
             }
-            
-
-            motor.SetFacingDirection(context.isFacingRight);
-            // --- 阶段 6: 清理 (可选) ---
-            // requestLayer.ClearProcessedRequests(); // 清理已处理的请求
-            // _currentContextData.ClearPerFrameData(); // 清理ContextData中每帧更新的临时数据
-        
         }
 
         private void OnDestroy()
@@ -138,7 +125,7 @@ namespace src.Character
             netHealth = fullHealth;
 
             // 创建并启动逻辑层
-            inputLayer = new InputLayer(context, isLocalPlayer);
+            inputLayer = new InputLayer(this);
             requestLayer = new RequestLayer(inputLayer, characterMoveRequests);
             behaviorLayer = new BehaviorLayer(this);
             
@@ -356,6 +343,20 @@ namespace src.Character
             else
             {
                 Debug.LogWarning($"Client {netId}: Could not find opponent {opponentNetId}");
+            }
+        }
+
+        /// <summary>
+        /// [Command] 方法，由客户端调用，在服务器上执行。
+        /// 用于将本地玩家的输入数据发送到服务器。
+        /// </summary>
+        /// <param name="input">包含Tick和输入信号的网络数据包</param>
+        [Command]
+        public void CmdSendInput(NetworkInputData input)
+        {
+            if (GameSessionManager.Instance is not null)
+            {
+                GameSessionManager.Instance.ReceivePlayerInput(netId, input);
             }
         }
         #endregion

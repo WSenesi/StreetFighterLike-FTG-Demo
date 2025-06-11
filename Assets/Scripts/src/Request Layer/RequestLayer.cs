@@ -31,7 +31,7 @@ namespace src.Request_Layer
             }
         }
 
-        public void Update()
+        public void Tick()
         {
             GenerateRequests();
             generatedRequests.Update();

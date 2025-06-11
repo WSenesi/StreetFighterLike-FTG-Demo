@@ -47,7 +47,7 @@ namespace src.UI
             }
         }
         
-        private void Update()
+        private void FixedUpdate()
         {
             if (!isInitialized) return;
             

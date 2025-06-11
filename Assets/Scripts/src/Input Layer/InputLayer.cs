@@ -9,20 +9,22 @@ namespace src.Input_Layer
     {
         private Transform player;
         private Transform opponent;
-        
+        private readonly Character.Character character;
         public InputBuffer<DirectionSignal> directionInput;
         public InputBuffer<AttackSignal> attackInput;
 
         private readonly ContextData _context;
         private bool _isInLeft = true;
         private readonly bool _isLocalPlayer;
+        private uint _localTick = 0;
 
-        public InputLayer(ContextData context, bool isLocalPlayer)
+        public InputLayer(Character.Character character)
         {
-            this._context = context;
-            this.player = context.owner;
-            this.opponent = context.opponent;
-            _isLocalPlayer = isLocalPlayer;
+            this.character = character;
+            this._context = character.context;
+            this.player = _context.owner;
+            this.opponent = _context.opponent;
+            _isLocalPlayer = character.isLocalPlayer;
             directionInput = new InputBuffer<DirectionSignal>();
             attackInput = new InputBuffer<AttackSignal>();
         }
@@ -32,7 +34,7 @@ namespace src.Input_Layer
         
         }
     
-        public void Update()
+        public void Tick()
         {
             if (_context?.opponent is null) return;
             
@@ -41,8 +43,19 @@ namespace src.Input_Layer
 
             if (_isLocalPlayer)
             {
-                ProcessLocalDirectionInput();
-                ProcessLocalAttackInput();
+                _localTick++;
+                
+                var dir = ProcessLocalDirectionInput();
+                var atk = ProcessLocalAttackInput();
+                var netInput = new NetworkInputData()
+                {
+                    tick = _localTick,
+                    dirInput = dir,
+                    atkInput = atk,
+                };
+                
+                // 通过 Character 的 Command 发送到服务器
+                character.CmdSendInput(netInput);
             }
             else
             {
@@ -51,7 +64,7 @@ namespace src.Input_Layer
             }
         }
 
-        private void ProcessLocalDirectionInput()
+        private Direction ProcessLocalDirectionInput()
         {
             var horizontal = Input.GetAxisRaw("Horizontal");
             var vertical = Input.GetAxisRaw("Vertical");
@@ -114,9 +127,10 @@ namespace src.Input_Layer
             }
             
             _context.dirInput = direction;
+            return direction;
         }
 
-        private void ProcessLocalAttackInput()
+        private Attack ProcessLocalAttackInput()
         {
             bool lightPunch = Input.GetKey(KeyCode.U);
             bool lightKick = Input.GetKey(KeyCode.J);
@@ -177,6 +191,7 @@ namespace src.Input_Layer
             }
 
             _context.atkInput = attack;
+            return attack;
         }
 
         private void ProcessNeutralDirectionInput()

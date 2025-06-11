@@ -1,17 +1,33 @@
 using System.Collections.Generic;
+using System.Linq;
 using Mirror;
+using src.Input_Layer;
 using src.UI;
 using UnityEngine;
 
 namespace src.Network
 {
+    public struct PlayerInputForTick
+    {
+        public uint playerNetId;
+        public NetworkInputData inputData;
+    }
     public class GameSessionManager : NetworkBehaviour
     {
         // 主机端单例
         public static GameSessionManager Instance { get; private set; }
     
         // 存储当前会话中所有玩家的 Character 实例
-        private readonly List<Character.Character> players = new List<Character.Character>();
+        private readonly List<Character.Character> players = new ();
+
+        // 保留多少历史帧输入，这个值需要大于预期的最大网络延迟+处理延迟所对应的帧数，以确保正在处理的帧不会被以外清除
+        [Tooltip("决定服务器保留多少帧的输入历史记录")] 
+        [SerializeField] private uint _historyTicksToKeep = 200;
+        // --- 输入缓冲 ---
+        private readonly SortedDictionary<uint, List<PlayerInputForTick>> _tickInputBuffer = new ();
+        
+        // 服务器的逻辑帧计数器
+        private uint _serverTick = 0;
 
         public override void OnStartServer()
         {
@@ -25,6 +41,16 @@ namespace src.Network
                 Debug.LogWarning($"Multiple GameSessionManager instances detected. Destroying duplicate.");
                 Destroy(this);
             }
+        }
+
+        private void FixedUpdate()
+        {
+            if (!isServer) return;
+            _serverTick++;
+            
+            // ProcessTick();
+
+            CleanupOldInputs();
         }
 
         // 当一个网络化的玩家被添加到服务器，有 CustomNetworkManager 调用
@@ -99,6 +125,57 @@ namespace src.Network
                 Debug.LogError("UIManager instance not found on client!");
             }
         }
-        
+
+        /// <summary>
+        /// （仅在服务器端调用）接收由 Character 的 Command 转发来的玩家输入，并将其存储缓冲区
+        /// </summary>
+        /// <param name="playerNetId">提交输入的玩家网络ID</param>
+        /// <param name="input">提交的输入数据</param>
+        public void ReceivePlayerInput(uint playerNetId, NetworkInputData input)
+        {
+            if (!isServer) return;
+            
+            var tick = input.tick;
+            
+            // 如果字典中没有这个tick的记录
+            if (!_tickInputBuffer.ContainsKey(tick))
+            {
+                _tickInputBuffer.Add(tick, new List<PlayerInputForTick>());
+            }
+            // 创建新的输入记录
+            var inputRecord = new PlayerInputForTick()
+            {
+                playerNetId = playerNetId,
+                inputData = input,
+            };
+            
+            _tickInputBuffer[tick].Add(inputRecord);
+            
+            Debug.Log($"Host Buffered input for Player {playerNetId} at Client Tick: {tick}." +
+                      $"Dir: {input.dirInput}, Atk: {input.atkInput}");
+        }
+
+        /// <summary>
+        /// 清理过于陈旧的输入缓存，防止内存占用无限增长
+        /// </summary>
+        private void CleanupOldInputs()
+        {
+            // 服务器Tick还未超过预期最大网络延迟+处理延迟，或缓冲区为空，则无需清理
+            if (_serverTick < _historyTicksToKeep || _tickInputBuffer.Count == 0) return;
+            
+            // 要保留的数据中最早的 Tick 号
+            var oldestAllowedTick = _serverTick - _historyTicksToKeep;
+            // 找到所有需要移除的过期缓存
+            var keysToRemove = _tickInputBuffer.Keys.Where(key => key < oldestAllowedTick).ToList();
+            if (keysToRemove.Any())
+            {
+                foreach (var key in keysToRemove)
+                {
+                    _tickInputBuffer.Remove(key);
+                }
+                Debug.Log($"Cleaned up {keysToRemove.Count} input ticks older than {oldestAllowedTick}." +
+                          $"Buffer size is {_tickInputBuffer.Count} now.");
+            }
+        }
     }
 }
