@@ -4,8 +4,9 @@ namespace src.UI
 {
     public class InputRecordData
     {
-        public Direction Direction;
-        public Attack Attack;
+        public readonly Direction Direction;
+        public readonly Attack Attack;
+        // private int _duration;
         public int Duration;
         
         public InputRecordData(Direction direction, Attack attack, int duration)

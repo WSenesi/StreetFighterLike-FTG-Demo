@@ -8,15 +8,21 @@ namespace src.Network
     /// </summary>
     public class CustomNetworkManager : NetworkManager
     {
+        public Transform leftSpawnPoint;
+        public Transform rightSpawnPoint;
+        
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
             // --- 自定义角色生成位置逻辑 ---
-            Transform startPos = GetStartPosition();
+            Transform startPos = numPlayers == 0 ? leftSpawnPoint : rightSpawnPoint;
+            if (startPos is null)
+            {
+                Debug.LogError($"A spawn point is not set in NetworkManager. Player will spawn at default position.");
+                startPos = this.transform;
+            }
             
-            // 如果有可用出生点, 则使用该出生点生成玩家; 否则在场景原点生成
-            GameObject player = startPos is not null
-                ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
-                : Instantiate(playerPrefab);
+            // 实例化玩家预制体
+            GameObject player = Instantiate(playerPrefab, startPos.position, startPos.rotation);
             
             // 将生成的玩家对象与客户端连接关联起来
             NetworkServer.AddPlayerForConnection(conn, player);

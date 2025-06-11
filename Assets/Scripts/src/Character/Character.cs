@@ -32,10 +32,12 @@ namespace src.Character
         private bool _isGameReady = false;
         private int _nextHitStunDuration;                       // 存储临时受击硬直，供状态读取
         private Vector2 _nextKnockbackVelocity;                 // 存储临时击退，供状态读取
+        
+        public static Action<Character> OnCharacterInitialized;
 
         #region UI
 
-        [HideInInspector]
+        // [HideInInspector]
         public ProgressBarPro healthBar;
 
         #endregion
@@ -154,6 +156,12 @@ namespace src.Character
                 // TODO: 客户端发送 [Command] 通知服务器准备完毕
                 Debug.Log($"Client Character {netId} is now fully initialized and ready for game.");
             }
+            
+            // 所有逻辑层创建后，触发事件
+            Debug.Log($"Character {netId} has finished InitializeForGameplay. Firing OnCharacterInitialized event.");
+            OnCharacterInitialized.Invoke(this);
+            
+            // TODO: 健壮性优化：通知 UI管理器 绑定该角色的引用
             
             // 标记准备就绪
             _isGameReady = true;

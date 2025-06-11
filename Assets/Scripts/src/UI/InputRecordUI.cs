@@ -96,22 +96,20 @@ namespace src.UI
                 // If facing right, Front is Right, Back is Left. No change needed.
                 return logicalDirection;
             }
-            else
+
+            // If facing left, the logical 'Front' and 'Back' need to be swapped for display.
+            Direction displayDirection = logicalDirection;
+            if (logicalDirection.HasFlag(Direction.Front))
             {
-                // If facing left, the logical 'Front' and 'Back' need to be swapped for display.
-                Direction displayDirection = logicalDirection;
-                if (logicalDirection.HasFlag(Direction.Front))
-                {
-                    displayDirection &= ~Direction.Front;
-                    displayDirection |= Direction.Back;
-                }
-                else if (logicalDirection.HasFlag(Direction.Back))
-                {
-                    displayDirection &= ~Direction.Back;
-                    displayDirection |= Direction.Front;
-                }
-                return displayDirection;
+                displayDirection &= ~Direction.Front;
+                displayDirection |= Direction.Back;
             }
+            else if (logicalDirection.HasFlag(Direction.Back))
+            {
+                displayDirection &= ~Direction.Back;
+                displayDirection |= Direction.Front;
+            }
+            return displayDirection;
         }
 
         private void SetAttackIcons(Attack attack)
@@ -136,9 +134,9 @@ namespace src.UI
             hk.SetActive(target.hk.activeInHierarchy);
         }
 
-        public void SetDurationText(int duration)
+        private void SetDurationText(int duration)
         {
-            durationText.text = duration > 1 ? duration.ToString() : "";
+            durationText.text = duration >= 1 ? duration.ToString() : "";
         }
 
     }

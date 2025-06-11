@@ -9,7 +9,7 @@ namespace src.UI
         [SerializeField] private GameObject recordPrefab;
         [Range(1, 99)] public int capacity = 20;
         
-        private Character.Character _character;
+        [SerializeField] private Character.Character character;
         private InputLayer _inputLayer;
         private ContextData _context;
         
@@ -65,9 +65,9 @@ namespace src.UI
             }            
             Debug.Log($"Attempting to initialize RecordUIManager for character {characterToTrack.netId}. " +
                       $"InputLayer is {(characterToTrack.inputLayer == null ? "NULL" : "OK")}");
-            _character = characterToTrack;
-            _inputLayer = _character.inputLayer;
-            _context = _character.context;
+            character = characterToTrack;
+            _inputLayer = character.inputLayer;
+            _context = character.context;
             
             _inputHistory.Clear();
             isInitialized = true;
@@ -93,7 +93,8 @@ namespace src.UI
                 firstNode.Value.Attack == currentAtkSignal.attack)
             {
                 // If it is, just increment the duration.
-                firstNode.Value.Duration++;
+                var duration = firstNode.Value.Duration;
+                firstNode.Value.Duration = duration >= 99 ? duration : duration + 1;
             }
             else
             {
